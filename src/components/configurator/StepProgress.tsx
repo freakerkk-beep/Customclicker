@@ -23,12 +23,13 @@ export default function StepProgress({
 
   return (
     <div className="card-surface p-4 sm:p-5">
-      <div className="mb-3 flex items-baseline justify-between">
-        <p className="text-sm font-medium text-ink">
-          Bước {currentStep}/{steps.length}
+      <div className="mb-3">
+        {/* Kiểu web cũ: "Bước 1 — Bộ màu & số phím" bằng chữ hồng. */}
+        <p className="font-display text-base font-bold text-primary">
+          Bước {currentStep} — {steps[currentStep - 1]?.label}
         </p>
-        <p className="font-display text-base font-semibold text-primary">
-          {steps[currentStep - 1]?.label}
+        <p className="text-xs text-ink-muted">
+          {currentStep}/{steps.length} bước
         </p>
       </div>
 
@@ -44,7 +45,11 @@ export default function StepProgress({
         />
       </div>
 
-      <ol className="mt-4 hidden gap-2 sm:grid sm:grid-cols-5">
+      {/* grid-cols đặt bằng style vì Tailwind chỉ gom được class tĩnh khi build. */}
+      <ol
+        className="mt-4 hidden gap-2 sm:grid"
+        style={{ gridTemplateColumns: `repeat(${steps.length}, minmax(0, 1fr))` }}
+      >
         {steps.map((step) => {
           const done = step.id < currentStep;
           const active = step.id === currentStep;

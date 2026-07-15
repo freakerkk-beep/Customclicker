@@ -1,4 +1,5 @@
 import type { CSSProperties } from 'react';
+import { countGraphemes } from '../../../shared/sanitize';
 import type { KeyItem } from '../../../shared/orderSchema';
 import type { ColorPalette, SwitchType } from '../../types/product';
 import { getIconComponent } from '../../utils/icons';
@@ -33,8 +34,22 @@ export default function ClickerTray({ keys, palette, switchType }: ClickerTrayPr
   const gap = count > 8 ? 1.2 : 1.8;
   const keyWidth = (100 - padding * 2 - gap * (count - 1)) / count;
   const keyHeight = keyWidth * 1.12;
-  const fontSize = Math.max(keyWidth * 0.26, 1.1);
   const radius = keyWidth * 0.18;
+
+  /**
+   * Cỡ chữ tự co theo nội dung DÀI NHẤT trên khay.
+   * Nếu để cỡ chữ cố định, phím 4 ký tự ("2025") sẽ bị cắt cụt — mà đây là bản
+   * xem trước của hàng in thật nên không được phép hiển thị sai.
+   * Mọi phím dùng chung một cỡ chữ để nhìn đều tay.
+   */
+  const longest = keys.reduce(
+    (max, item) => (item.type === 'text' ? Math.max(max, countGraphemes(item.value)) : max),
+    1,
+  );
+  // Bề rộng khả dụng trong phím (trừ padding hai bên), chia cho số ký tự.
+  // Hệ số 0.62 ≈ bề ngang trung bình một ký tự so với cỡ chữ của font Bold.
+  const fitBy = (keyWidth * 0.82) / (longest * 0.62);
+  const fontSize = Math.max(Math.min(keyWidth * 0.34, fitBy), 0.8);
 
   const trayStyle: CSSProperties = {
     containerType: 'inline-size',
@@ -82,7 +97,7 @@ export default function ClickerTray({ keys, palette, switchType }: ClickerTrayPr
                   />
                 ) : (
                   <span
-                    className="max-w-full truncate px-[0.4cqw] text-center font-bold leading-none"
+                    className="max-w-full truncate px-[0.4cqw] text-center font-key font-bold leading-none"
                     style={{ fontSize: `${fontSize}cqw`, color: colors.text }}
                   >
                     {text || '·'}

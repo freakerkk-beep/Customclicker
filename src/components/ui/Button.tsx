@@ -13,7 +13,10 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 const VARIANTS: Record<Variant, string> = {
-  primary: 'bg-primary text-white hover:bg-primary-dark active:bg-primary-dark disabled:bg-primary/50',
+  // Nút chính: gradient hồng -> tím giống web cũ.
+  // Dùng brightness khi hover vì gradient không đổi màu bằng hover:bg-* được.
+  primary:
+    'bg-gradient-to-r from-brandPink to-brandPurple text-white shadow-soft hover:brightness-105 active:brightness-95 disabled:opacity-50',
   secondary: 'bg-white text-primary border border-line hover:bg-primary-soft/50 disabled:opacity-50',
   ghost: 'bg-transparent text-ink-muted hover:bg-primary-soft/40 disabled:opacity-50',
   danger: 'bg-white text-red-600 border border-red-200 hover:bg-red-50 disabled:opacity-50',

@@ -15,3 +15,37 @@ export function sanitizeText(input: string, maxLength: number): string {
 export function collapseWhitespace(input: string): string {
   return input.replace(/\s+/g, ' ').trim();
 }
+
+/**
+ * ĐẾM KÝ TỰ THEO CÁCH NGƯỜI DÙNG NHÌN THẤY.
+ *
+ * Vì sao cần hàm này: JavaScript đếm chuỗi theo "code unit", không theo ký tự
+ * mắt thường nhìn thấy. Ví dụ "🎉".length = 2, "❤️".length = 2, cờ "🇻🇳".length = 4.
+ * Nếu dùng .length thì khách gõ 2 emoji đã bị báo vượt quá 4 ký tự — sai.
+ *
+ * Intl.Segmenter gom đúng từng cụm ký tự (grapheme) như người dùng thấy.
+ * Trình duyệt hiện đại và Node 20+ đều hỗ trợ; nếu không có thì lùi về đếm
+ * theo code point (vẫn đúng với đa số emoji đơn).
+ */
+function segment(input: string): string[] {
+  const Seg = (Intl as unknown as { Segmenter?: typeof Intl.Segmenter }).Segmenter;
+  if (typeof Seg === 'function') {
+    const seg = new Seg('vi', { granularity: 'grapheme' });
+    return Array.from(seg.segment(input), (s) => s.segment);
+  }
+  return Array.from(input);
+}
+
+/** Số ký tự người dùng thực sự nhìn thấy ("🎉ab" -> 3, không phải 4). */
+export function countGraphemes(input: string): number {
+  return segment(input).length;
+}
+
+/**
+ * Cắt chuỗi theo số ký tự nhìn thấy, KHÔNG cắt đôi emoji.
+ * `"ab🎉".slice(0,3)` của JS sẽ tạo ra ký tự rác; hàm này thì không.
+ */
+export function sliceGraphemes(input: string, maxGraphemes: number): string {
+  const parts = segment(input);
+  return parts.length <= maxGraphemes ? input : parts.slice(0, maxGraphemes).join('');
+}

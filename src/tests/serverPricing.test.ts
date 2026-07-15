@@ -6,7 +6,7 @@ import type { ClickerCustomData } from '../../shared/orderSchema';
 function makeData(overrides: Partial<ClickerCustomData> = {}): ClickerCustomData {
   return {
     characterCount: 6,
-    colorPaletteId: 'milk-tea',
+    colorPaletteId: 'milk-tea-pastel',
     switchType: 'clicky',
     keys: [
       { type: 'text', value: 'A' },

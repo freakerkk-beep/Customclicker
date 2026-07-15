@@ -21,12 +21,16 @@ import ProductPreview from './ProductPreview';
 import StepProgress, { type Step } from './StepProgress';
 import SwitchSelector from './SwitchSelector';
 
+/**
+ * 4 bước — giữ đúng luồng của web cũ (customclicker.netlify.app):
+ * bộ màu và số phím gộp chung một bước để khách thấy ngay khay đổi màu,
+ * thay vì phải bấm qua 5 bước như bản trước.
+ */
 const STEPS: Step[] = [
-  { id: 1, label: 'Số ký tự' },
-  { id: 2, label: 'Chọn màu' },
-  { id: 3, label: 'Custom phím' },
-  { id: 4, label: 'Âm thanh' },
-  { id: 5, label: 'Đặt hàng' },
+  { id: 1, label: 'Bộ màu & số phím' },
+  { id: 2, label: 'Nội dung phím' },
+  { id: 3, label: 'Âm thanh' },
+  { id: 4, label: 'Đặt hàng' },
 ];
 
 interface ProductConfiguratorProps {
@@ -112,7 +116,7 @@ export default function ProductConfigurator({ product }: ProductConfiguratorProp
 
     try {
       const { toPng } = await import('html-to-image');
-      const dataUrl = await toPng(node, { pixelRatio: 2, backgroundColor: '#FFF9F3' });
+      const dataUrl = await toPng(node, { pixelRatio: 2, backgroundColor: '#FFFFFF' });
       if (dataUrl.length > LIMITS.previewImageMaxChars) return undefined;
       return dataUrl;
     } catch {
@@ -129,7 +133,8 @@ export default function ProductConfigurator({ product }: ProductConfiguratorProp
     if (hasErrors(validationErrors)) {
       showToast('Còn vài chỗ chưa hợp lệ, bạn kiểm tra giúp mình nhé.', 'error');
       const firstKey = Object.keys(validationErrors)[0];
-      if (firstKey?.startsWith('customData') || firstKey === 'keys') goToStep(3);
+      // Lỗi nội dung phím -> đưa khách về bước 2 ("Nội dung phím") của luồng 4 bước.
+      if (firstKey?.startsWith('customData') || firstKey === 'keys') goToStep(2);
       return;
     }
 
@@ -204,22 +209,21 @@ export default function ProductConfigurator({ product }: ProductConfiguratorProp
           />
 
           {step === 1 ? (
-            <CharacterCountSelector
-              product={product}
-              value={config.state.characterCount}
-              onChange={config.setCharacterCount}
-            />
+            <>
+              <CharacterCountSelector
+                product={product}
+                value={config.state.characterCount}
+                onChange={config.setCharacterCount}
+              />
+              <ColorPaletteSelector
+                product={product}
+                value={config.state.colorPaletteId}
+                onChange={config.setPalette}
+              />
+            </>
           ) : null}
 
           {step === 2 ? (
-            <ColorPaletteSelector
-              product={product}
-              value={config.state.colorPaletteId}
-              onChange={config.setPalette}
-            />
-          ) : null}
-
-          {step === 3 ? (
             <>
               <KeyCustomizer
                 product={product}
@@ -237,7 +241,7 @@ export default function ProductConfigurator({ product }: ProductConfiguratorProp
             </>
           ) : null}
 
-          {step === 4 ? (
+          {step === 3 ? (
             <SwitchSelector
               product={product}
               value={config.state.switchType}
@@ -245,7 +249,7 @@ export default function ProductConfigurator({ product }: ProductConfiguratorProp
             />
           ) : null}
 
-          {step === 5 ? (
+          {step === 4 ? (
             <>
               <OrderSummary
                 product={product}
@@ -299,10 +303,10 @@ export default function ProductConfigurator({ product }: ProductConfiguratorProp
       </div>
 
       {/* ------- Thanh cố định đáy màn hình trên điện thoại ------- */}
-      <div className="pb-safe fixed inset-x-0 bottom-0 z-30 border-t border-line bg-cream/95 px-4 pt-3 backdrop-blur lg:hidden">
+      <div className="pb-safe fixed inset-x-0 bottom-0 z-30 border-t border-line bg-white/95 px-4 pt-3 backdrop-blur lg:hidden">
         <div className="mb-2 flex items-baseline justify-between">
           <span className="text-xs text-ink-muted">
-            {config.state.characterCount} ký tự
+            {config.state.characterCount} phím
             {config.state.quantity > 1 ? ` × ${config.state.quantity}` : ''}
           </span>
           <span className="font-display text-lg font-bold text-primary">{formatVnd(subtotal)}</span>

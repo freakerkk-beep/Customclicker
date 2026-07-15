@@ -249,7 +249,7 @@ export default function CustomerForm({ values, errors, onChange, disabled }: Cus
               className="mt-0.5 h-4 w-4 shrink-0 rounded border-line text-primary focus:ring-primary"
             />
             <span className="text-sm">
-              Tôi đã kiểm tra đúng nội dung, số lượng ký tự và màu sắc của sản phẩm.
+              Tôi đã kiểm tra đúng nội dung, số lượng phím và màu sắc của sản phẩm.
             </span>
           </label>
           {errors.designConfirmed ? (

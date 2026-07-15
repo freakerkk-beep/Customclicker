@@ -24,6 +24,12 @@ export interface ColorPalette {
   key: string;
   /** Màu chữ/icon trên phím. */
   text: string;
+  /**
+   * Mã vật liệu theo thứ tự đế/phím/chữ, ví dụ "M05/M06/M05".
+   * Hiện dưới tên bộ màu (giống web cũ) để xưởng và khách nói cùng một ngôn ngữ
+   * khi trao đổi đơn.
+   */
+  code: string;
 }
 
 export interface IconOption {

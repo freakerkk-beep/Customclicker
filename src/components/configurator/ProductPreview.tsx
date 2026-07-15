@@ -27,7 +27,7 @@ export default function ProductPreview({ customData, palette, captureRef }: Prod
     setSaving(true);
     try {
       const { toPng } = await import('html-to-image');
-      const dataUrl = await toPng(node, { pixelRatio: 2, backgroundColor: '#FFF9F3' });
+      const dataUrl = await toPng(node, { pixelRatio: 2, backgroundColor: '#FFFFFF' });
 
       const link = document.createElement('a');
       link.download = `raccoonie-clicker-${customData.characterCount}-phim.png`;

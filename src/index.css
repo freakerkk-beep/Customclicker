@@ -2,13 +2,37 @@
 @tailwind components;
 @tailwind utilities;
 
+/**
+ * FONT CHỮ IN TRÊN PHÍM.
+ *
+ * Đây là file font khách gửi (Be Vietnam Pro Bold), đặt tại
+ * public/fonts/BeVietnamPro-Bold.ttf — KHÔNG tải từ Google Fonts, để chữ trên
+ * phím hiển thị đúng y hệt file gốc dùng khi sản xuất.
+ *
+ * font-display: block -> chờ font tải xong mới vẽ chữ, tránh cảnh khách thấy
+ * chữ nhảy font khi đang xem trước thiết kế (quan trọng vì đây là bản xem thử
+ * của sản phẩm sẽ được in thật).
+ */
+@font-face {
+  font-family: 'Clicker Key';
+  src: url('/fonts/BeVietnamPro-Bold.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: block;
+}
+
 @layer base {
   html {
     scroll-behavior: smooth;
   }
 
   body {
-    @apply bg-cream text-ink font-sans antialiased;
+    @apply text-ink font-sans antialiased;
+    /* Nền gradient hồng -> xanh tím nhạt, lấy theo web cũ.
+       min-height + fixed để gradient phủ hết trang kể cả khi nội dung ngắn. */
+    background: linear-gradient(135deg, theme('colors.pageFrom') 0%, #F2EEFD 55%, theme('colors.pageTo') 100%);
+    background-attachment: fixed;
+    min-height: 100vh;
     /* Chặn tràn ngang trên điện thoại. */
     overflow-x: hidden;
   }

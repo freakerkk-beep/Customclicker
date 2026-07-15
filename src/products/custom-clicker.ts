@@ -23,23 +23,82 @@ export const customClickerProduct: ProductConfig = {
 
   images: [
     // Thay ảnh thật vào public/products/custom-clicker/ và sửa đường dẫn tại đây.
-    { src: '/products/custom-clicker/clicker-1.svg', alt: 'Custom Clicker Raccoonie bộ màu Milk Tea' },
-    { src: '/products/custom-clicker/clicker-2.svg', alt: 'Cận cảnh các phím của Custom Clicker' },
-    { src: '/products/custom-clicker/clicker-3.svg', alt: 'Custom Clicker đặt trên bàn làm việc' },
+    { src: '/products/custom-clicker/clicker-1.svg', alt: 'Custom Clicker Raccoonie bộ màu Milk Tea Pastel' },
+    { src: '/products/custom-clicker/clicker-2.svg', alt: 'Custom Clicker bộ màu Taro Sweet' },
+    { src: '/products/custom-clicker/clicker-3.svg', alt: 'Custom Clicker bộ màu Honey Vanilla' },
   ],
   thumbnailUrl: '/products/custom-clicker/clicker-1.svg',
 
   pricing: CLICKER_PRICING,
   productionTime: '3 – 5 ngày làm việc kể từ khi chốt đơn',
 
+  /**
+   * BẢY BỘ MÀU — lấy đúng theo web cũ của Raccoonie.
+   *
+   * Màu được ĐO TRỰC TIẾP từ ảnh chụp web cũ (từng pixel của đế / phím / chữ),
+   * không phải ước lượng bằng mắt, nên khay xem trước hiện đúng như bản đang bán.
+   *
+   * `code` là mã vật liệu theo thứ tự đế/phím/chữ. Lưu ý: mã chỉ dùng để hiển
+   * thị và trao đổi với xưởng — KHÔNG dùng mã để suy ra màu, vì cùng một mã khi
+   * làm đế và khi làm phím lên màu khác nhau (ví dụ M05 ở đế đậm hơn ở phím).
+   */
   palettes: [
-    { id: 'milk-tea', name: 'Milk Tea', tray: '#C9A227', key: '#EBD9C3', text: '#5F3B22' },
-    { id: 'strawberry-cream', name: 'Strawberry Cream', tray: '#E8879B', key: '#FFE3E8', text: '#8C3149' },
-    { id: 'baby-blue', name: 'Baby Blue', tray: '#7FB2D8', key: '#E2F1FB', text: '#2C5878' },
-    { id: 'lavender', name: 'Lavender', tray: '#9B8AC4', key: '#EDE7FA', text: '#4B3A78' },
-    { id: 'mint', name: 'Mint', tray: '#79C2A6', key: '#E1F6EE', text: '#255F49' },
-    { id: 'lemon-cream', name: 'Lemon Cream', tray: '#E3C34D', key: '#FBF3D5', text: '#6B5312' },
-    { id: 'chocolate', name: 'Chocolate', tray: '#6B4034', key: '#E9D6C9', text: '#3A2018' },
+    {
+      id: 'milk-tea-pastel',
+      name: 'Milk Tea Pastel',
+      code: 'M05/M06/M05',
+      tray: '#B93338',
+      key: '#F1BAC4',
+      text: '#7E2934',
+    },
+    {
+      id: 'matcha-cream',
+      name: 'Matcha Cream',
+      code: 'M15/M02/M15',
+      tray: '#53633F',
+      key: '#F6F3EC',
+      text: '#414F31',
+    },
+    {
+      id: 'cherry-cream',
+      name: 'Cherry Cream',
+      code: 'M16/M05/M02',
+      tray: '#E9DAC0',
+      key: '#981C21',
+      text: '#FDF4EC',
+    },
+    {
+      id: 'black-white-classic',
+      name: 'Black White Classic',
+      code: 'M10/M02/M10',
+      tray: '#1D1D1D',
+      key: '#F3EEE5',
+      text: '#1D1D1D',
+    },
+    {
+      id: 'taro-sweet',
+      name: 'Taro Sweet',
+      code: 'M02/M17/M13',
+      tray: '#F3EEE5',
+      key: '#B19CCE',
+      text: '#C09726',
+    },
+    {
+      id: 'orange-pop',
+      name: 'Orange Pop',
+      code: 'M03/M04/M02',
+      tray: '#9EC6A8',
+      key: '#E36B34',
+      text: '#FFF3E8',
+    },
+    {
+      id: 'honey-vanilla',
+      name: 'Honey Vanilla',
+      code: 'M02/S16/S19',
+      tray: '#F3EEE5',
+      key: '#E4C04F',
+      text: '#4F3A20',
+    },
   ],
 
   icons: [

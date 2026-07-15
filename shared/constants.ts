@@ -1,6 +1,10 @@
 /** Giới hạn dùng chung giữa frontend và backend. */
 export const LIMITS = {
-  keyTextMaxLength: 10,
+  /**
+   * Tối đa 4 ký tự trên mỗi phím — giống web cũ ("Tối đa 4 ký tự — chữ cái,
+   * số, emoji đều được"). Đếm theo ký tự nhìn thấy nên 1 emoji = 1 ký tự.
+   */
+  keyTextMaxLength: 4,
   customerNameMin: 2,
   customerNameMax: 80,
   addressMax: 200,

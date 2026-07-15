@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { LIMITS } from './constants';
 import { normalizePhone, VN_PHONE_REGEX } from './phone';
-import { collapseWhitespace, sanitizeText } from './sanitize';
+import { collapseWhitespace, countGraphemes, sanitizeText, sliceGraphemes } from './sanitize';
 
 /**
  * Schema dùng chung. Frontend dùng để báo lỗi sớm cho khách,
@@ -26,10 +26,15 @@ export const keyItemSchema = z.discriminatedUnion('type', [
       .pipe(
         z
           .string()
-          .min(1, 'Phím chưa có nội dung.')
-          .max(LIMITS.keyTextMaxLength, `Nội dung phím tối đa ${LIMITS.keyTextMaxLength} ký tự.`),
+          .refine((v) => countGraphemes(v) >= 1, 'Phím chưa có nội dung.')
+          // Đếm theo ký tự nhìn thấy: "🎉" = 1 ký tự, không phải 2.
+          .refine(
+            (v) => countGraphemes(v) <= LIMITS.keyTextMaxLength,
+            `Nội dung phím tối đa ${LIMITS.keyTextMaxLength} ký tự.`,
+          ),
       )
-      .transform((v) => sanitizeText(v, LIMITS.keyTextMaxLength)),
+      // Cắt an toàn (không xé đôi emoji) rồi mới bỏ ký tự điều khiển.
+      .transform((v) => sanitizeText(sliceGraphemes(v, LIMITS.keyTextMaxLength), v.length)),
   }),
   z.object({
     type: z.literal('icon'),

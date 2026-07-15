@@ -223,15 +223,15 @@ Sau khi sửa `.env`, phải **tắt `npm run dev` và chạy lại** thì mới
 
 # PHẦN D — Logo và ảnh sản phẩm
 
-## Bước 13. Logo Raccoonie
+## Bước 13. Đặt logo vào đúng chỗ
 
-Logo bạn cung cấp đã được đặt sẵn tại:
+Copy file logo Raccoonie của bạn vào thư mục `public/assets/` và **đặt tên chính xác là**:
 
 ```
 public/assets/logo-raccoonie.png
 ```
 
-Khi cần thay logo sau này, hãy ghi đè đúng file này để không phải sửa code.
+Sau đó xoá file `public/assets/PLACE_LOGO_HERE.txt` (chỉ là ghi chú nhắc việc).
 
 > Nếu chưa có logo, website vẫn chạy: chỗ logo tự động hiện chữ "Raccoonie" thay thế,
 > không bị vỡ giao diện.
@@ -241,7 +241,8 @@ Khi cần thay logo sau này, hãy ghi đè đúng file này để không phải
 - **Ảnh sản phẩm**: hiện là 3 file SVG vẽ tạm trong `public/products/custom-clicker/`.
   Chụp ảnh thật, copy vào thư mục đó, rồi sửa đường dẫn trong
   `src/products/custom-clicker.ts` (phần `images`).
-- **Âm thanh switch**: hai file `public/audio/clicky.mp3` và `public/audio/smooth.mp3` đã được đặt sẵn từ file bạn cung cấp. Có thể ghi đè đúng tên file để thay âm thanh sau này.
+- **Âm thanh switch**: nút "Nghe thử" cần 2 file `public/audio/clicky.mp3` và
+  `public/audio/smooth.mp3`. **Chưa có 2 file này thì nút tự động ẩn đi**, không lỗi.
 
 ---
 
@@ -501,8 +502,8 @@ raccoonie-custom-clicker/
 | Đặt hàng báo "Không kết nối được máy chủ" | Thiếu biến môi trường trên Netlify (Bước 17). Kiểm tra `/.netlify/functions/health` |
 | `Thiếu biến môi trường: SUPABASE_URL` | Điền biến trên Netlify rồi **Trigger deploy** lại (thêm biến xong phải deploy lại mới có tác dụng) |
 | Đơn lưu được nhưng không sang Pancake | Bình thường khi `PANCAKE_SYNC_ENABLED=false`. Muốn bật, xem Phần F |
-| Logo không hiện | Kiểm tra file `public/assets/logo-raccoonie.png` có còn tồn tại và đúng định dạng PNG |
-| Nút "Nghe thử" không thấy | Kiểm tra `public/audio/clicky.mp3` và `public/audio/smooth.mp3` có tồn tại, phát được |
+| Logo không hiện | Sai tên file. Phải đúng `public/assets/logo-raccoonie.png` |
+| Nút "Nghe thử" không thấy | Chưa có file mp3 trong `public/audio/` — nút tự ẩn (Bước 14) |
 | Sửa `.env` mà không thấy đổi | Tắt `npm run dev` (`Ctrl + C`) rồi chạy lại |
 
 ---
@@ -534,3 +535,76 @@ Khi hỏi ai đó, hãy gửi kèm: (1) ảnh chụp thông báo lỗi, (2) log 
 (3) bước bạn đang làm.
 
 **Đừng bao giờ gửi kèm file `.env` hay `service_role key`.**
+
+---
+
+# PHẦN H — Đổi giao diện & thêm sản phẩm mới
+
+Phần này ghi lại những thứ hay phải sửa nhất, để lần sau bạn (hoặc người khác)
+không phải đi dò khắp code.
+
+## H1. Font chữ in trên phím
+
+File font đặt tại `public/fonts/BeVietnamPro-Bold.ttf`, khai báo trong
+`src/index.css` với tên `Clicker Key`, và dùng qua class Tailwind `font-key`.
+
+Muốn đổi sang font khác:
+
+1. Chép file `.ttf` mới vào `public/fonts/`.
+2. Sửa đường dẫn trong khối `@font-face` ở `src/index.css`.
+
+Font này **không tải từ Google Fonts** — dùng đúng file gốc để chữ xem trước
+giống hệt chữ in ra sản phẩm thật.
+
+## H2. Đổi tông màu website
+
+Toàn bộ tông màu nằm ở **một chỗ**: `tailwind.config.js`, mục `colors`.
+
+| Token | Ý nghĩa | Giá trị hiện tại |
+| --- | --- | --- |
+| `primary` | Hồng — nút, bước đang chọn, tiêu đề bước | `#ED5A8A` |
+| `accent` | Tím — nhãn mục ("BỘ MÀU (7 MẪU)") | `#7A56F0` |
+| `brandPink` → `brandPurple` | Gradient nút chính & chữ hiệu | `#E35A92` → `#8157E9` |
+| `pageFrom` → `pageTo` | Gradient nền trang (khai báo ở `src/index.css`) | `#F9EEF8` → `#EAF1FE` |
+
+Đổi giá trị ở đây là cả website đổi theo. Nếu đổi màu hồng chính, nhớ sửa luôn
+`<meta name="theme-color">` trong `index.html` (màu thanh trình duyệt trên điện thoại).
+
+## H3. Sửa 7 bộ màu sản phẩm
+
+Nằm ở `src/products/custom-clicker.ts`, mục `palettes`. Mỗi bộ gồm:
+
+- `tray` (đế), `key` (phím), `text` (chữ/icon) — **mã màu thật**, đo từ sản phẩm.
+- `code` — mã vật liệu đế/phím/chữ, ví dụ `M05/M06/M05`, chỉ để hiển thị.
+
+> **Lưu ý quan trọng:** đừng suy màu từ `code`. Cùng một mã vật liệu khi làm đế
+> và khi làm phím lên màu khác nhau (ví dụ M05 ở đế là `#B93338`, ở phím là
+> `#981C21`). Luôn lấy màu đo từ ảnh sản phẩm thật.
+
+Đổi `id` của bộ màu thì nhớ sửa cả `src/tests/serverPricing.test.ts` và
+`src/tests/validation.test.ts` — hai test này có ghi `colorPaletteId` cố định.
+
+## H4. Thêm một sản phẩm clicker mới
+
+Website đã dựng sẵn cho nhiều sản phẩm: trang chủ tự liệt kê, đường dẫn
+`/products/<slug>` tự hoạt động.
+
+1. Tạo file mới trong `src/products/`, ví dụ `mini-clicker.ts`, copy cấu trúc từ
+   `custom-clicker.ts` rồi sửa `id`, `slug`, `name`, `pricing`, `palettes`.
+2. Thêm ảnh vào `public/products/<slug>/`.
+3. Mở `src/products/productRegistry.ts`, import file vừa tạo và thêm vào mảng
+   `PRODUCTS`.
+
+Xong. Không phải sửa trang chủ hay router.
+
+> Sau này muốn quản lý sản phẩm bằng Supabase thay vì file code, chỉ cần thay
+> phần thân 3 hàm trong `productRegistry.ts` bằng lời gọi API — phần còn lại của
+> website giữ nguyên.
+
+## H5. Số ký tự trên phím
+
+Giới hạn 4 ký tự đặt ở `shared/constants.ts` (`LIMITS.keyTextMaxLength`).
+
+Chữ trên phím đếm theo **ký tự nhìn thấy**, nên 1 emoji = 1 ký tự (`🎉` tuy dài
+2 đơn vị trong JavaScript nhưng vẫn tính là 1). Logic này ở `shared/sanitize.ts`
+và được dùng chung cho cả trình duyệt lẫn máy chủ, nên hai bên không thể lệch nhau.

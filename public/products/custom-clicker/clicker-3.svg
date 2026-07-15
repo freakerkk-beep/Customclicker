@@ -1,20 +1,16 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" width="800" height="600" role="img" aria-label="Trên bàn làm việc — Baby Blue">
-  <rect width="800" height="600" fill="#FFF9F3"/>
-  <rect x="110" y="230" width="580" height="150" rx="26" fill="#7FB2D8"/>
-  <g fill="#E2F1FB">
-    <rect x="140" y="258" width="94" height="94" rx="16"/>
-    <rect x="250" y="258" width="94" height="94" rx="16"/>
-    <rect x="360" y="258" width="94" height="94" rx="16"/>
-    <rect x="470" y="258" width="94" height="94" rx="16"/>
-    <rect x="580" y="258" width="80" height="94" rx="16"/>
-  </g>
-  <g fill="#2C5878" font-family="sans-serif" font-size="34" font-weight="700" text-anchor="middle">
-    <text x="187" y="317">R</text>
-    <text x="297" y="317">A</text>
-    <text x="407" y="317">C</text>
-    <text x="517" y="317">C</text>
-    <text x="620" y="317">!</text>
-  </g>
-  <text x="400" y="450" font-family="sans-serif" font-size="22" fill="#8A736E" text-anchor="middle">Trên bàn làm việc — Baby Blue</text>
-  <text x="400" y="482" font-family="sans-serif" font-size="16" fill="#C4ADA6" text-anchor="middle">Ảnh tạm — thay bằng ảnh chụp thật trong public/products/custom-clicker/</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" width="800" height="600" role="img" aria-label="Custom Clicker — bộ màu Honey Vanilla">
+  <rect width="800" height="600" fill="#FDF6EE"/>
+  <rect x="110" y="230" width="580" height="150" rx="26" fill="#F3EEE5"/>
+    <rect x="140.0" y="258" width="91.2" height="94" rx="16" fill="#E4C04F"/>
+    <text x="185.6" y="305" text-anchor="middle" dominant-baseline="central" font-family="Be Vietnam Pro, sans-serif" font-weight="700" font-size="40" fill="#4F3A20">H</text>
+    <rect x="247.2" y="258" width="91.2" height="94" rx="16" fill="#E4C04F"/>
+    <text x="292.8" y="305" text-anchor="middle" dominant-baseline="central" font-family="Be Vietnam Pro, sans-serif" font-weight="700" font-size="40" fill="#4F3A20">O</text>
+    <rect x="354.4" y="258" width="91.2" height="94" rx="16" fill="#E4C04F"/>
+    <text x="400.0" y="305" text-anchor="middle" dominant-baseline="central" font-family="Be Vietnam Pro, sans-serif" font-weight="700" font-size="40" fill="#4F3A20">N</text>
+    <rect x="461.6" y="258" width="91.2" height="94" rx="16" fill="#E4C04F"/>
+    <text x="507.2" y="305" text-anchor="middle" dominant-baseline="central" font-family="Be Vietnam Pro, sans-serif" font-weight="700" font-size="40" fill="#4F3A20">E</text>
+    <rect x="568.8" y="258" width="91.2" height="94" rx="16" fill="#E4C04F"/>
+    <text x="614.4" y="305" text-anchor="middle" dominant-baseline="central" font-family="Be Vietnam Pro, sans-serif" font-weight="700" font-size="40" fill="#4F3A20">Y</text>
+  <text x="400" y="440" text-anchor="middle" font-family="Be Vietnam Pro, sans-serif" font-size="26" font-weight="700" fill="#2F2A38">Honey Vanilla</text>
+  <text x="400" y="472" text-anchor="middle" font-family="monospace" font-size="18" fill="#8B8494">M02/S16/S19</text>
 </svg>

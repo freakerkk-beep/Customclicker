@@ -44,7 +44,7 @@ export default function OrderSummary({
 
       <dl className="divide-y divide-line">
         <Row label="Sản phẩm" value={product.name} />
-        <Row label="Số ký tự" value={`${customData.characterCount} ký tự`} />
+        <Row label="Số lượng phím" value={`${customData.characterCount} phím`} />
         <Row label="Bộ màu" value={palette?.name ?? customData.colorPaletteId} />
         <Row label="Switch" value={customData.switchType === 'clicky' ? 'Clicky' : 'Smooth'} />
       </dl>
@@ -54,7 +54,8 @@ export default function OrderSummary({
           <p className="text-sm font-medium">Nội dung từng phím</p>
           <button
             type="button"
-            onClick={() => onEditStep(3)}
+            // Bước 2 = "Nội dung phím" trong luồng 4 bước.
+            onClick={() => onEditStep(2)}
             className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-medium text-primary hover:bg-primary-soft"
           >
             <Pencil className="h-3 w-3" aria-hidden="true" />

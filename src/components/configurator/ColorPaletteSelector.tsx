@@ -33,8 +33,8 @@ function PaletteDots({ palette }: { palette: ColorPalette }) {
 export default function ColorPaletteSelector({ product, value, onChange }: ColorPaletteSelectorProps) {
   return (
     <Card>
-      <CardTitle hint="Mỗi bộ gồm màu khay, màu phím và màu chữ đã phối sẵn.">
-        Bộ màu sản phẩm
+      <CardTitle hint="Chọn bộ màu — đế, phím và màu chữ đi cố định cùng nhau.">
+        {`Bộ màu (${product.palettes.length} mẫu)`}
       </CardTitle>
 
       <div
@@ -42,7 +42,7 @@ export default function ColorPaletteSelector({ product, value, onChange }: Color
         role="radiogroup"
         aria-label="Bộ màu sản phẩm"
       >
-        {product.palettes.map((palette) => {
+        {product.palettes.map((palette, index) => {
           const selected = palette.id === value;
           return (
             <button
@@ -69,17 +69,20 @@ export default function ColorPaletteSelector({ product, value, onChange }: Color
                 style={{ backgroundColor: palette.tray }}
               >
                 <span
-                  className="flex h-7 w-9 items-center justify-center rounded-md text-[10px] font-bold"
+                  className="flex h-7 w-9 items-center justify-center rounded-md font-key text-[10px] font-bold"
                   style={{ backgroundColor: palette.key, color: palette.text }}
                 >
                   Aa
                 </span>
               </div>
 
-              <p className="text-sm font-medium">{palette.name}</p>
-              <div className="mt-1.5 flex items-center justify-between gap-2">
+              <p className="text-sm font-medium">
+                {index + 1}. {palette.name}
+              </p>
+              {/* Mã vật liệu đế/phím/chữ — giống web cũ, để đối chiếu với xưởng. */}
+              <p className="font-mono text-[10px] text-ink-muted">{palette.code}</p>
+              <div className="mt-1.5">
                 <PaletteDots palette={palette} />
-                <span className="font-mono text-[10px] uppercase text-ink-muted">{palette.tray}</span>
               </div>
             </button>
           );

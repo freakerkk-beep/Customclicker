@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { isValidVnPhone, normalizePhone } from '../../shared/phone';
-import { sanitizeText } from '../../shared/sanitize';
-import { createOrderRequestSchema, getOrderQuerySchema } from '../../shared/orderSchema';
+import { countGraphemes, sanitizeText, sliceGraphemes } from '../../shared/sanitize';
+import { createOrderRequestSchema, getOrderQuerySchema, keyItemSchema } from '../../shared/orderSchema';
 
 describe('normalizePhone / isValidVnPhone', () => {
   it.each([
@@ -55,7 +55,7 @@ const validRequest = {
   quantity: 1,
   customData: {
     characterCount: 3,
-    colorPaletteId: 'milk-tea',
+    colorPaletteId: 'milk-tea-pastel',
     switchType: 'clicky',
     keys: [
       { type: 'text', value: 'A' },
@@ -164,4 +164,41 @@ describe('getOrderQuerySchema', () => {
       expect(() => getOrderQuerySchema.parse({ orderCode, phone: '0912345678' })).toThrow();
     },
   );
+});
+
+describe('đếm ký tự trên phím (emoji = 1 ký tự)', () => {
+  it.each([
+    ['ABCD', 4],
+    ['2025', 4],
+    ['Hà', 2],
+    ['🎉', 1],
+    ['🎉🎉🎉🎉', 4],
+    ['a🎉b', 3],
+    ['❤️', 1],
+    ['🇻🇳', 1],
+    ['👨‍👩‍👧', 1],
+  ])('countGraphemes(%s) = %i', (input, expected) => {
+    expect(countGraphemes(input)).toBe(expected);
+  });
+
+  it('đếm khác với .length của JS ở emoji', () => {
+    // Đây chính là lý do phải có countGraphemes: .length đếm sai.
+    expect('🎉'.length).toBe(2);
+    expect(countGraphemes('🎉')).toBe(1);
+  });
+
+  it('sliceGraphemes không xé đôi emoji', () => {
+    expect(sliceGraphemes('a🎉b🎉c', 4)).toBe('a🎉b🎉');
+    expect(countGraphemes(sliceGraphemes('a🎉b🎉c', 4))).toBe(4);
+    // Cách cũ dùng .slice sẽ tạo ký tự rác:
+    expect('a🎉b🎉c'.slice(0, 4)).not.toBe('a🎉b🎉');
+  });
+
+  it('nhận 4 emoji trên một phím, từ chối 5', () => {
+    const key = (value: string) => keyItemSchema.safeParse({ type: 'text', value });
+    expect(key('🎉🎉🎉🎉').success).toBe(true);
+    expect(key('🎉🎉🎉🎉🎉').success).toBe(false);
+    expect(key('ABCD').success).toBe(true);
+    expect(key('ABCDE').success).toBe(false);
+  });
 });

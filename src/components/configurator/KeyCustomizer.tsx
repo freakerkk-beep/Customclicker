@@ -1,5 +1,6 @@
 import { AlertCircle, Eraser, Type as TypeIcon } from 'lucide-react';
 import { LIMITS } from '../../../shared/constants';
+import { countGraphemes, sliceGraphemes } from '../../../shared/sanitize';
 import type { KeyItem } from '../../../shared/orderSchema';
 import type { ColorPalette, ProductConfig } from '../../types/product';
 import { getIconComponent } from '../../utils/icons';
@@ -30,7 +31,7 @@ function MiniKeyPreview({ item, palette }: { item: KeyItem; palette: ColorPalett
         <Icon className="h-5 w-5" style={{ color: textColor }} />
       ) : (
         <span
-          className="max-w-full truncate px-1 text-[10px] font-bold leading-none"
+          className="max-w-full truncate px-1 font-key text-[10px] font-bold leading-none"
           style={{ color: textColor }}
         >
           {item.type === 'text' ? item.value || '—' : '—'}
@@ -54,7 +55,9 @@ export default function KeyCustomizer({
 
   return (
     <Card>
-      <CardTitle hint={`Mỗi phím tối đa ${LIMITS.keyTextMaxLength} ký tự, có dấu tiếng Việt cũng được.`}>
+      <CardTitle
+        hint={`Tối đa ${LIMITS.keyTextMaxLength} ký tự — chữ cái, số, emoji đều được 🎉`}
+      >
         Nội dung từng phím
       </CardTitle>
 
@@ -62,7 +65,9 @@ export default function KeyCustomizer({
         {visibleKeys.map((item, index) => {
           const isText = item.type === 'text';
           const textValue = isText ? item.value : '';
-          const tooLong = textValue.length > LIMITS.keyTextMaxLength;
+          // Đếm theo ký tự nhìn thấy để 1 emoji = 1 ký tự.
+          const textLength = countGraphemes(textValue);
+          const tooLong = textLength > LIMITS.keyTextMaxLength;
           const onlySpaces = isText && textValue.length > 0 && textValue.trim().length === 0;
           const inputId = `key-${index}-text`;
 
@@ -121,8 +126,15 @@ export default function KeyCustomizer({
                         id={inputId}
                         type="text"
                         value={textValue}
-                        maxLength={LIMITS.keyTextMaxLength}
-                        onChange={(event) => onSetKey(index, { type: 'text', value: event.target.value })}
+                        // Không dùng maxLength của HTML: nó đếm theo code unit nên
+                        // sẽ chặn nhầm khi khách gõ emoji. Cắt bằng sliceGraphemes
+                        // để 1 emoji = 1 ký tự.
+                        onChange={(event) =>
+                          onSetKey(index, {
+                            type: 'text',
+                            value: sliceGraphemes(event.target.value, LIMITS.keyTextMaxLength),
+                          })
+                        }
                         onBlur={(event) =>
                           onSetKey(index, { type: 'text', value: event.target.value.trim() })
                         }
@@ -147,7 +159,7 @@ export default function KeyCustomizer({
                         <span
                           className={`shrink-0 text-[11px] ${tooLong ? 'text-red-600' : 'text-ink-muted'}`}
                         >
-                          {textValue.length}/{LIMITS.keyTextMaxLength}
+                          {textLength}/{LIMITS.keyTextMaxLength}
                         </span>
                       </div>
                     </div>
