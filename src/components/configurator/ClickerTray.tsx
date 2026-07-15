@@ -8,6 +8,8 @@ interface ClickerTrayProps {
   keys: KeyItem[];
   palette: ColorPalette | undefined;
   switchType: SwitchType;
+  /** Ẩn ba nhãn phụ khi khay nằm trong card custom tối giản. */
+  showMeta?: boolean;
 }
 
 const FALLBACK: ColorPalette = {
@@ -27,7 +29,12 @@ const FALLBACK: ColorPalette = {
  * đơn vị `cqw` (phần trăm chiều rộng container). Nhờ vậy khay tự vừa khung ở
  * mọi độ rộng — từ điện thoại tới desktop — mà không cần JavaScript đo đạc.
  */
-export default function ClickerTray({ keys, palette, switchType }: ClickerTrayProps) {
+export default function ClickerTray({
+  keys,
+  palette,
+  switchType,
+  showMeta = true,
+}: ClickerTrayProps) {
   const colors = palette ?? FALLBACK;
   const count = Math.max(keys.length, 1);
 
@@ -111,13 +118,15 @@ export default function ClickerTray({ keys, palette, switchType }: ClickerTrayPr
         </div>
       </div>
 
-      <div className="mt-3 flex flex-wrap items-center justify-center gap-2 text-xs text-ink-muted">
-        <span className="rounded-full bg-white px-2.5 py-1 shadow-soft">{keys.length} phím</span>
-        <span className="rounded-full bg-white px-2.5 py-1 shadow-soft">{colors.name}</span>
-        <span className="rounded-full bg-white px-2.5 py-1 shadow-soft">
-          Switch {switchType === 'clicky' ? 'Clicky' : 'Smooth'}
-        </span>
-      </div>
+      {showMeta ? (
+        <div className="mt-3 flex flex-wrap items-center justify-center gap-2 text-xs text-ink-muted">
+          <span className="rounded-full bg-white px-2.5 py-1 shadow-soft">{keys.length} phím</span>
+          <span className="rounded-full bg-white px-2.5 py-1 shadow-soft">{colors.name}</span>
+          <span className="rounded-full bg-white px-2.5 py-1 shadow-soft">
+            Switch {switchType === 'clicky' ? 'Clicky' : 'Smooth'}
+          </span>
+        </div>
+      ) : null}
     </div>
   );
 }

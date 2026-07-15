@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react';
 import { Check, Volume2 } from 'lucide-react';
 import type { ProductConfig, SwitchType } from '../../types/product';
-import Card, { CardTitle } from '../ui/Card';
+import { CardTitle } from '../ui/Card';
 
 interface SwitchSelectorProps {
   product: ProductConfig;
@@ -25,7 +25,7 @@ export default function SwitchSelector({ product, value, onChange }: SwitchSelec
   };
 
   return (
-    <Card>
+    <section>
       <CardTitle hint="Cảm giác bấm và tiếng kêu khác nhau rõ rệt giữa hai loại.">
         Âm thanh switch
       </CardTitle>
@@ -94,6 +94,6 @@ export default function SwitchSelector({ product, value, onChange }: SwitchSelec
           );
         })}
       </div>
-    </Card>
+    </section>
   );
 }

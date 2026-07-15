@@ -30,7 +30,12 @@
     @apply text-ink font-sans antialiased;
     /* Nền gradient hồng -> xanh tím nhạt, lấy theo web cũ.
        min-height + fixed để gradient phủ hết trang kể cả khi nội dung ngắn. */
-    background: linear-gradient(135deg, theme('colors.pageFrom') 0%, #F2EEFD 55%, theme('colors.pageTo') 100%);
+    background: linear-gradient(
+      135deg,
+      theme('colors.pageFrom') 0%,
+      #f2eefd 55%,
+      theme('colors.pageTo') 100%
+    );
     background-attachment: fixed;
     min-height: 100vh;
     /* Chặn tràn ngang trên điện thoại. */

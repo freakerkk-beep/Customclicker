@@ -1,6 +1,5 @@
 import { Check } from 'lucide-react';
 import type { ColorPalette, ProductConfig } from '../../types/product';
-import Card, { CardTitle } from '../ui/Card';
 
 interface ColorPaletteSelectorProps {
   product: ProductConfig;
@@ -8,37 +7,46 @@ interface ColorPaletteSelectorProps {
   onChange: (paletteId: string) => void;
 }
 
-/** Ba chấm màu: khay – phím – chữ. */
-function PaletteDots({ palette }: { palette: ColorPalette }) {
-  const dots: Array<{ color: string; label: string }> = [
-    { color: palette.tray, label: 'Màu khay' },
-    { color: palette.key, label: 'Màu phím' },
-    { color: palette.text, label: 'Màu chữ' },
-  ];
+function withAlpha(hex: string, alpha: string): string {
+  return /^#[0-9a-f]{6}$/i.test(hex) ? `${hex}${alpha}` : '#FBF5FC';
+}
 
+function MiniPalette({ palette }: { palette: ColorPalette }) {
   return (
-    <div className="flex -space-x-1.5">
-      {dots.map((dot) => (
+    <div
+      className="mx-auto mb-2 flex h-8 w-fit items-center gap-1 rounded-lg px-2"
+      style={{ backgroundColor: palette.tray }}
+      aria-hidden="true"
+    >
+      {[0, 1, 2].map((item) => (
         <span
-          key={dot.label}
-          title={`${dot.label}: ${dot.color}`}
-          className="h-6 w-6 rounded-full border-2 border-white shadow-sm"
-          style={{ backgroundColor: dot.color }}
+          key={item}
+          className="h-4 w-4 rounded-[4px] shadow-[inset_0_-1px_0_rgba(0,0,0,0.12)]"
+          style={{ backgroundColor: palette.key }}
         />
       ))}
     </div>
   );
 }
 
-export default function ColorPaletteSelector({ product, value, onChange }: ColorPaletteSelectorProps) {
+export default function ColorPaletteSelector({
+  product,
+  value,
+  onChange,
+}: ColorPaletteSelectorProps) {
   return (
-    <Card>
-      <CardTitle hint="Chọn bộ màu — đế, phím và màu chữ đi cố định cùng nhau.">
-        {`Bộ màu (${product.palettes.length} mẫu)`}
-      </CardTitle>
+    <section aria-labelledby="palette-title">
+      <div className="mb-2">
+        <h3
+          id="palette-title"
+          className="font-display text-sm font-bold uppercase tracking-wide text-accent"
+        >
+          Bộ màu ({product.palettes.length} mẫu)
+        </h3>
+      </div>
 
       <div
-        className="grid grid-cols-2 gap-3 sm:grid-cols-3"
+        className="grid grid-cols-2 gap-2.5 sm:grid-cols-4"
         role="radiogroup"
         aria-label="Bộ màu sản phẩm"
       >
@@ -52,46 +60,36 @@ export default function ColorPaletteSelector({ product, value, onChange }: Color
               aria-checked={selected}
               onClick={() => onChange(palette.id)}
               className={[
-                'relative rounded-xl border p-3 text-left transition-all',
+                'relative min-h-[92px] rounded-xl border px-2 py-2.5 text-center transition-all',
                 selected
-                  ? 'border-primary bg-primary-soft/60 shadow-soft'
-                  : 'border-line bg-white hover:border-primary/40',
+                  ? 'border-primary shadow-[0_0_0_3px_rgba(237,90,138,0.2)]'
+                  : 'border-line hover:border-primary/45 hover:-translate-y-0.5',
               ].join(' ')}
+              style={{ backgroundColor: withAlpha(palette.tray, selected ? '22' : '12') }}
             >
               {selected ? (
-                <span className="absolute right-2 top-2 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-white">
-                  <Check className="h-3 w-3" aria-hidden="true" />
+                <span className="absolute right-1.5 top-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-white">
+                  <Check className="h-2.5 w-2.5" aria-hidden="true" />
                 </span>
               ) : null}
 
-              <div
-                className="mb-2.5 flex h-12 items-center justify-center rounded-lg"
-                style={{ backgroundColor: palette.tray }}
+              <MiniPalette palette={palette} />
+              <p
+                className={`text-[11px] font-bold leading-tight ${selected ? 'text-primary' : 'text-ink'}`}
               >
-                <span
-                  className="flex h-7 w-9 items-center justify-center rounded-md font-key text-[10px] font-bold"
-                  style={{ backgroundColor: palette.key, color: palette.text }}
-                >
-                  Aa
-                </span>
-              </div>
-
-              <p className="text-sm font-medium">
                 {index + 1}. {palette.name}
               </p>
-              {/* Mã vật liệu đế/phím/chữ — giống web cũ, để đối chiếu với xưởng. */}
-              <p className="font-mono text-[10px] text-ink-muted">{palette.code}</p>
-              <div className="mt-1.5">
-                <PaletteDots palette={palette} />
-              </div>
+              <p className="mt-0.5 font-mono text-[9px] leading-tight text-ink-muted/75">
+                {palette.code}
+              </p>
             </button>
           );
         })}
       </div>
 
-      <p className="mt-4 rounded-lg bg-cream px-3 py-2 text-xs text-ink-muted">
-        Màu thực tế có thể lệch nhẹ so với màu hiển thị trên màn hình của bạn.
+      <p className="mt-3 text-xs text-ink-muted">
+        Màu thực tế có thể lệch nhẹ so với màu trên màn hình.
       </p>
-    </Card>
+    </section>
   );
 }

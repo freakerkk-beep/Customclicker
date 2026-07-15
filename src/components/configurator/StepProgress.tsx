@@ -19,68 +19,52 @@ export default function StepProgress({
   onStepClick,
   maxReachedStep,
 }: StepProgressProps) {
-  const progress = ((currentStep - 1) / (steps.length - 1)) * 100;
-
   return (
-    <div className="card-surface p-4 sm:p-5">
-      <div className="mb-3">
-        {/* Kiểu web cũ: "Bước 1 — Bộ màu & số phím" bằng chữ hồng. */}
-        <p className="font-display text-base font-bold text-primary">
-          Bước {currentStep} — {steps[currentStep - 1]?.label}
-        </p>
-        <p className="text-xs text-ink-muted">
-          {currentStep}/{steps.length} bước
-        </p>
-      </div>
-
-      <div className="h-1.5 w-full overflow-hidden rounded-full bg-primary-soft">
-        <div
-          className="h-full rounded-full bg-primary transition-all duration-300"
-          style={{ width: `${progress}%` }}
-          role="progressbar"
-          aria-valuenow={currentStep}
-          aria-valuemin={1}
-          aria-valuemax={steps.length}
-          aria-label={`Tiến trình: bước ${currentStep} trên ${steps.length}`}
-        />
-      </div>
-
-      {/* grid-cols đặt bằng style vì Tailwind chỉ gom được class tĩnh khi build. */}
-      <ol
-        className="mt-4 hidden gap-2 sm:grid"
-        style={{ gridTemplateColumns: `repeat(${steps.length}, minmax(0, 1fr))` }}
-      >
-        {steps.map((step) => {
+    <nav aria-label="Các bước thiết kế" className="mx-auto mb-6 max-w-[560px] px-2 sm:mb-8">
+      <ol className="flex items-start">
+        {steps.map((step, index) => {
           const done = step.id < currentStep;
           const active = step.id === currentStep;
           const reachable = step.id <= maxReachedStep;
+          const connectorDone = step.id < currentStep;
 
           return (
-            <li key={step.id}>
+            <li key={step.id} className="relative flex-1">
+              {index < steps.length - 1 ? (
+                <span
+                  aria-hidden="true"
+                  className={`absolute left-1/2 top-[17px] h-[2px] w-full transition-colors ${
+                    connectorDone ? 'bg-primary' : 'bg-primary-soft'
+                  }`}
+                />
+              ) : null}
+
               <button
                 type="button"
                 onClick={() => reachable && onStepClick(step.id)}
                 disabled={!reachable}
                 aria-current={active ? 'step' : undefined}
-                className={[
-                  'flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-left text-xs transition-colors',
-                  reachable ? 'hover:bg-primary-soft/60' : 'cursor-not-allowed opacity-45',
-                  active ? 'bg-primary-soft' : '',
-                ].join(' ')}
+                className="relative z-10 mx-auto flex w-full flex-col items-center disabled:cursor-not-allowed"
               >
                 <span
                   className={[
-                    'flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[10px] font-semibold',
-                    done
-                      ? 'bg-primary text-white'
-                      : active
-                        ? 'border-2 border-primary text-primary'
-                        : 'border border-line text-ink-muted',
+                    'flex h-9 w-9 items-center justify-center rounded-full text-sm font-bold transition-all',
+                    active
+                      ? 'bg-primary text-white shadow-soft ring-4 ring-primary-soft'
+                      : done
+                        ? 'bg-primary text-white'
+                        : 'bg-primary-soft text-primary',
+                    reachable ? '' : 'opacity-65',
                   ].join(' ')}
                 >
-                  {done ? <Check className="h-3 w-3" aria-hidden="true" /> : step.id}
+                  {done ? <Check className="h-4 w-4" aria-hidden="true" /> : step.id}
                 </span>
-                <span className={active ? 'font-medium text-primary' : 'text-ink-muted'}>
+                <span
+                  className={[
+                    'mt-2 max-w-[78px] text-center text-[10px] font-medium leading-tight sm:text-xs',
+                    active ? 'font-bold text-primary' : done ? 'text-primary' : 'text-ink-muted/55',
+                  ].join(' ')}
+                >
                   {step.label}
                 </span>
               </button>
@@ -88,6 +72,6 @@ export default function StepProgress({
           );
         })}
       </ol>
-    </div>
+    </nav>
   );
 }

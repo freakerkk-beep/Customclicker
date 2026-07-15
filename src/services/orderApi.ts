@@ -38,7 +38,12 @@ async function request<T>(url: string, init?: RequestInit): Promise<T> {
     try {
       body = (await response.json()) as unknown;
     } catch {
-      throw new ApiError('BAD_RESPONSE', 'Máy chủ trả về dữ liệu không đọc được.', undefined, response.status);
+      throw new ApiError(
+        'BAD_RESPONSE',
+        'Máy chủ trả về dữ liệu không đọc được.',
+        undefined,
+        response.status,
+      );
     }
 
     if (!response.ok || (body as { ok?: boolean }).ok === false) {
@@ -57,7 +62,10 @@ async function request<T>(url: string, init?: RequestInit): Promise<T> {
     if (error instanceof DOMException && error.name === 'AbortError') {
       throw new ApiError('TIMEOUT', 'Máy chủ phản hồi quá lâu. Vui lòng kiểm tra mạng và thử lại.');
     }
-    throw new ApiError('NETWORK_ERROR', 'Không kết nối được tới máy chủ. Kiểm tra mạng giúp mình nhé.');
+    throw new ApiError(
+      'NETWORK_ERROR',
+      'Không kết nối được tới máy chủ. Kiểm tra mạng giúp mình nhé.',
+    );
   } finally {
     window.clearTimeout(timer);
   }

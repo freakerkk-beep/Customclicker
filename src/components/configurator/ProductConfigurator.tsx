@@ -21,17 +21,19 @@ import ProductPreview from './ProductPreview';
 import StepProgress, { type Step } from './StepProgress';
 import SwitchSelector from './SwitchSelector';
 
-/**
- * 4 bước — giữ đúng luồng của web cũ (customclicker.netlify.app):
- * bộ màu và số phím gộp chung một bước để khách thấy ngay khay đổi màu,
- * thay vì phải bấm qua 5 bước như bản trước.
- */
 const STEPS: Step[] = [
   { id: 1, label: 'Bộ màu & số phím' },
   { id: 2, label: 'Nội dung phím' },
   { id: 3, label: 'Âm thanh' },
   { id: 4, label: 'Đặt hàng' },
 ];
+
+const STEP_DESCRIPTIONS: Record<number, string> = {
+  1: 'Chọn số phím và bộ màu — đế, phím và màu chữ đi cố định cùng nhau.',
+  2: 'Chạm vào từng phím để nhập chữ hoặc chọn icon bạn muốn.',
+  3: 'Chọn loại switch và bấm nghe thử trước khi đặt.',
+  4: 'Kiểm tra lại thiết kế rồi điền thông tin nhận hàng.',
+};
 
 interface ProductConfiguratorProps {
   product: ProductConfig;
@@ -48,15 +50,14 @@ export default function ProductConfigurator({ product }: ProductConfiguratorProp
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
 
+  const sectionRef = useRef<HTMLDivElement>(null);
   const previewRef = useRef<HTMLDivElement>(null);
-  // Giữ nguyên một key cho mọi lần thử lại của CÙNG một đơn -> bấm nhiều lần
-  // hoặc mạng chập chờn cũng không tạo ra hai đơn.
   const idempotencyKey = useRef(createIdempotencyKey());
 
   useUnsavedChangesWarning(config.isDirty && !submitting);
 
   const palette = useMemo(
-    () => product.palettes.find((p) => p.id === config.state.colorPaletteId),
+    () => product.palettes.find((item) => item.id === config.state.colorPaletteId),
     [product.palettes, config.state.colorPaletteId],
   );
 
@@ -64,9 +65,12 @@ export default function ProductConfigurator({ product }: ProductConfiguratorProp
   const subtotal = unitPrice * config.state.quantity;
 
   const goToStep = (next: number) => {
+    if (next < 1 || next > STEPS.length) return;
     setStep(next);
     setMaxReachedStep((current) => Math.max(current, next));
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.requestAnimationFrame(() => {
+      sectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
   };
 
   const handleReset = () => {
@@ -74,6 +78,7 @@ export default function ProductConfigurator({ product }: ProductConfiguratorProp
     setStep(1);
     setMaxReachedStep(1);
     setErrors({});
+    setCustomer(EMPTY_CUSTOMER);
     idempotencyKey.current = createIdempotencyKey();
     showToast('Đã bắt đầu lại từ đầu.', 'info');
   };
@@ -83,7 +88,6 @@ export default function ProductConfigurator({ product }: ProductConfiguratorProp
     showToast('Đã khôi phục thiết kế trước đó.', 'success');
   };
 
-  /** Kiểm tra ngay trên máy khách để báo lỗi sớm. Server vẫn kiểm tra lại toàn bộ. */
   const validateAll = (): Record<string, string> => {
     const next: Record<string, string> = { ...validateDesign(config.customData, product) };
 
@@ -109,7 +113,6 @@ export default function ProductConfigurator({ product }: ProductConfiguratorProp
     return next;
   };
 
-  /** Ảnh preview là tuỳ chọn — chụp lỗi thì vẫn đặt hàng bình thường. */
   const capturePreview = async (): Promise<string | undefined> => {
     const node = previewRef.current;
     if (!node) return undefined;
@@ -125,7 +128,7 @@ export default function ProductConfigurator({ product }: ProductConfiguratorProp
   };
 
   const handleSubmit = async () => {
-    if (submitting) return; // chặn double click
+    if (submitting) return;
 
     const validationErrors = validateAll();
     setErrors(validationErrors);
@@ -133,7 +136,6 @@ export default function ProductConfigurator({ product }: ProductConfiguratorProp
     if (hasErrors(validationErrors)) {
       showToast('Còn vài chỗ chưa hợp lệ, bạn kiểm tra giúp mình nhé.', 'error');
       const firstKey = Object.keys(validationErrors)[0];
-      // Lỗi nội dung phím -> đưa khách về bước 2 ("Nội dung phím") của luồng 4 bước.
       if (firstKey?.startsWith('customData') || firstKey === 'keys') goToStep(2);
       return;
     }
@@ -163,7 +165,6 @@ export default function ProductConfigurator({ product }: ProductConfiguratorProp
         clientQuotedUnitPrice: unitPrice,
       });
 
-      // Chỉ tới trang thành công KHI backend đã ghi nhận đơn và trả về mã đơn.
       config.commit();
       navigate(`/order-success/${result.orderCode}`, {
         state: { order: result, productName: product.name },
@@ -183,150 +184,162 @@ export default function ProductConfigurator({ product }: ProductConfiguratorProp
   const isLastStep = step === STEPS.length;
 
   return (
-    <div className="mx-auto max-w-6xl px-4 pb-32 lg:pb-12">
-      <div className="mb-5 flex flex-wrap items-center justify-between gap-2">
-        <h1 className="font-display text-2xl font-bold sm:text-3xl">Thiết kế clicker của bạn</h1>
-        <div className="flex gap-2">
-          {config.canRestore ? (
-            <Button variant="secondary" size="sm" onClick={handleRestore} icon={<Undo2 className="h-3.5 w-3.5" />}>
-              Khôi phục thiết kế trước
-            </Button>
-          ) : null}
-          <Button variant="ghost" size="sm" onClick={handleReset} icon={<RotateCcw className="h-3.5 w-3.5" />}>
-            Bắt đầu lại
-          </Button>
-        </div>
-      </div>
+    <div ref={sectionRef} className="scroll-mt-20 px-4">
+      <div className="mx-auto max-w-[720px]">
+        <StepProgress
+          steps={STEPS}
+          currentStep={step}
+          maxReachedStep={maxReachedStep}
+          onStepClick={goToStep}
+        />
 
-      <div className="grid gap-6 lg:grid-cols-[1fr_380px]">
-        {/* ------- Cột trái: các bước tuỳ chỉnh ------- */}
-        <div className="order-2 space-y-5 lg:order-1">
-          <StepProgress
-            steps={STEPS}
-            currentStep={step}
-            maxReachedStep={maxReachedStep}
-            onStepClick={goToStep}
-          />
+        <section className="rounded-[28px] border border-primary/25 bg-white px-5 py-6 shadow-[0_12px_40px_rgba(131,86,176,0.09)] sm:px-8 sm:py-8">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+            <div>
+              <h1 className="font-display text-xl font-bold text-primary sm:text-2xl">
+                Bước {step} — {STEPS[step - 1]?.label}
+              </h1>
+              <p className="mt-1 text-sm text-ink-muted">{STEP_DESCRIPTIONS[step]}</p>
+            </div>
 
-          {step === 1 ? (
-            <>
-              <CharacterCountSelector
-                product={product}
-                value={config.state.characterCount}
-                onChange={config.setCharacterCount}
-              />
-              <ColorPaletteSelector
-                product={product}
-                value={config.state.colorPaletteId}
-                onChange={config.setPalette}
-              />
-            </>
-          ) : null}
+            <div className="w-fit shrink-0 rounded-full bg-primary-soft/60 px-3 py-1.5 text-xs text-ink-muted">
+              Giá hiện tại:{' '}
+              <strong className="font-display text-sm text-primary" aria-live="polite">
+                {formatVnd(unitPrice)}
+              </strong>
+            </div>
+          </div>
 
-          {step === 2 ? (
-            <>
-              <KeyCustomizer
-                product={product}
-                keys={config.state.keys}
-                characterCount={config.state.characterCount}
-                palette={palette}
-                onSetKey={config.setKey}
-                onClearKey={config.clearKey}
-              />
-              {errors.keys ? (
-                <p className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-                  {errors.keys}
-                </p>
-              ) : null}
-            </>
-          ) : null}
-
-          {step === 3 ? (
-            <SwitchSelector
-              product={product}
-              value={config.state.switchType}
-              onChange={config.setSwitchType}
+          <div className="my-6 sm:my-7">
+            <ProductPreview
+              customData={config.customData}
+              palette={palette}
+              captureRef={previewRef}
+              compact
             />
-          ) : null}
+          </div>
 
-          {step === 4 ? (
-            <>
-              <OrderSummary
+          <div className="space-y-7">
+            {step === 1 ? (
+              <>
+                <CharacterCountSelector
+                  product={product}
+                  value={config.state.characterCount}
+                  onChange={config.setCharacterCount}
+                />
+                <ColorPaletteSelector
+                  product={product}
+                  value={config.state.colorPaletteId}
+                  onChange={config.setPalette}
+                />
+              </>
+            ) : null}
+
+            {step === 2 ? (
+              <>
+                <KeyCustomizer
+                  product={product}
+                  keys={config.state.keys}
+                  characterCount={config.state.characterCount}
+                  palette={palette}
+                  onSetKey={config.setKey}
+                  onClearKey={config.clearKey}
+                />
+                {errors.keys ? (
+                  <p className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                    {errors.keys}
+                  </p>
+                ) : null}
+              </>
+            ) : null}
+
+            {step === 3 ? (
+              <SwitchSelector
                 product={product}
-                customData={config.customData}
-                palette={palette}
-                quantity={config.state.quantity}
-                unitPrice={unitPrice}
-                subtotal={subtotal}
-                onQuantityChange={config.setQuantity}
-                onEditStep={goToStep}
+                value={config.state.switchType}
+                onChange={config.setSwitchType}
               />
-              <CustomerForm
-                values={customer}
-                errors={errors}
-                onChange={setCustomer}
-                disabled={submitting}
-              />
-              <div className="hidden lg:block">
-                <Button size="lg" fullWidth onClick={handleSubmit} loading={submitting}>
-                  {submitting ? 'Đang gửi đơn…' : `Đặt hàng – ${formatVnd(subtotal)}`}
-                </Button>
-              </div>
-            </>
-          ) : null}
+            ) : null}
 
-          {/* Điều hướng bước trên desktop */}
-          <div className="hidden items-center justify-between gap-3 lg:flex">
-            <Button
-              variant="secondary"
-              onClick={() => goToStep(step - 1)}
-              disabled={step === 1}
-              icon={<ArrowLeft className="h-4 w-4" />}
-            >
-              Quay lại
-            </Button>
-            {!isLastStep ? (
-              <Button onClick={() => goToStep(step + 1)}>
-                Tiếp tục
-                <ArrowRight className="h-4 w-4" aria-hidden="true" />
-              </Button>
+            {step === 4 ? (
+              <>
+                <OrderSummary
+                  product={product}
+                  customData={config.customData}
+                  palette={palette}
+                  quantity={config.state.quantity}
+                  unitPrice={unitPrice}
+                  subtotal={subtotal}
+                  onQuantityChange={config.setQuantity}
+                  onEditStep={goToStep}
+                />
+                <CustomerForm
+                  values={customer}
+                  errors={errors}
+                  onChange={setCustomer}
+                  disabled={submitting}
+                />
+              </>
             ) : null}
           </div>
-        </div>
 
-        {/* ------- Cột phải: preview (sticky trên desktop, trên cùng ở mobile) ------- */}
-        <div className="order-1 lg:order-2">
-          <div className="lg:sticky lg:top-24">
-            <ProductPreview customData={config.customData} palette={palette} captureRef={previewRef} />
+          <div className="mt-7 flex gap-2.5">
+            {step > 1 ? (
+              <Button
+                variant="secondary"
+                size="lg"
+                onClick={() => goToStep(step - 1)}
+                aria-label="Quay lại bước trước"
+                className="!rounded-full px-5"
+              >
+                <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+                <span className="hidden sm:inline">Quay lại</span>
+              </Button>
+            ) : null}
+
+            {isLastStep ? (
+              <Button
+                size="lg"
+                fullWidth
+                onClick={handleSubmit}
+                loading={submitting}
+                className="!rounded-full"
+              >
+                {submitting ? 'Đang gửi đơn…' : `Đặt hàng – ${formatVnd(subtotal)}`}
+              </Button>
+            ) : (
+              <Button
+                size="lg"
+                fullWidth
+                onClick={() => goToStep(step + 1)}
+                className="!rounded-full"
+              >
+                Tiếp theo
+                <ArrowRight className="h-4 w-4" aria-hidden="true" />
+              </Button>
+            )}
           </div>
-        </div>
-      </div>
+        </section>
 
-      {/* ------- Thanh cố định đáy màn hình trên điện thoại ------- */}
-      <div className="pb-safe fixed inset-x-0 bottom-0 z-30 border-t border-line bg-white/95 px-4 pt-3 backdrop-blur lg:hidden">
-        <div className="mb-2 flex items-baseline justify-between">
-          <span className="text-xs text-ink-muted">
-            {config.state.characterCount} phím
-            {config.state.quantity > 1 ? ` × ${config.state.quantity}` : ''}
-          </span>
-          <span className="font-display text-lg font-bold text-primary">{formatVnd(subtotal)}</span>
-        </div>
-        <div className="flex gap-2">
-          {step > 1 ? (
-            <Button variant="secondary" onClick={() => goToStep(step - 1)} aria-label="Quay lại bước trước">
-              <ArrowLeft className="h-4 w-4" aria-hidden="true" />
-            </Button>
+        <div className="mt-3 flex flex-wrap items-center justify-center gap-1 text-xs">
+          {config.canRestore ? (
+            <button
+              type="button"
+              onClick={handleRestore}
+              className="inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-ink-muted hover:bg-white/70 hover:text-primary"
+            >
+              <Undo2 className="h-3.5 w-3.5" aria-hidden="true" />
+              Khôi phục thiết kế trước
+            </button>
           ) : null}
-          {isLastStep ? (
-            <Button fullWidth onClick={handleSubmit} loading={submitting}>
-              {submitting ? 'Đang gửi đơn…' : `Đặt hàng – ${formatVnd(subtotal)}`}
-            </Button>
-          ) : (
-            <Button fullWidth onClick={() => goToStep(step + 1)}>
-              Tiếp tục
-              <ArrowRight className="h-4 w-4" aria-hidden="true" />
-            </Button>
-          )}
+          <button
+            type="button"
+            onClick={handleReset}
+            className="inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-ink-muted hover:bg-white/70 hover:text-primary"
+          >
+            <RotateCcw className="h-3.5 w-3.5" aria-hidden="true" />
+            Bắt đầu lại
+          </button>
         </div>
       </div>
     </div>

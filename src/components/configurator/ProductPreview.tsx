@@ -12,14 +12,20 @@ interface ProductPreviewProps {
   palette: ColorPalette | undefined;
   /** Gắn vào khay để chụp ảnh preview khi đặt hàng. */
   captureRef?: RefObject<HTMLDivElement>;
+  /** Dạng gọn đặt trực tiếp trong card các bước. */
+  compact?: boolean;
 }
 
-export default function ProductPreview({ customData, palette, captureRef }: ProductPreviewProps) {
+export default function ProductPreview({
+  customData,
+  palette,
+  captureRef,
+  compact = false,
+}: ProductPreviewProps) {
   const [zoomed, setZoomed] = useState(false);
   const [saving, setSaving] = useState(false);
   const { showToast } = useToast();
 
-  /** Tải ảnh preview về máy. html-to-image được nạp động để không nặng lần tải đầu. */
   const handleDownload = async () => {
     const node = captureRef?.current;
     if (!node) return;
@@ -42,18 +48,20 @@ export default function ProductPreview({ customData, palette, captureRef }: Prod
   };
 
   return (
-    <div className="card-surface p-5">
-      <div className="mb-4 flex items-center justify-between gap-2">
-        <h2 className="text-base font-semibold">Xem trước</h2>
-        <div className="flex gap-1">
+    <div className={compact ? 'mx-auto w-full max-w-[430px]' : 'card-surface p-5'}>
+      <div className={`flex items-center justify-between gap-2 ${compact ? 'mb-2' : 'mb-4'}`}>
+        <p className={compact ? 'text-xs text-ink-muted' : 'text-base font-semibold'}>
+          {compact ? 'Xem trước clicker của bạn' : 'Xem trước'}
+        </p>
+        <div className="flex gap-0.5">
           <button
             type="button"
             onClick={() => setZoomed(true)}
             aria-label="Phóng to xem trước"
             title="Phóng to"
-            className="rounded-lg p-2 text-ink-muted transition-colors hover:bg-primary-soft hover:text-primary"
+            className="rounded-lg p-1.5 text-ink-muted transition-colors hover:bg-primary-soft hover:text-primary"
           >
-            <Maximize2 className="h-4 w-4" aria-hidden="true" />
+            <Maximize2 className="h-3.5 w-3.5" aria-hidden="true" />
           </button>
           <button
             type="button"
@@ -61,20 +69,30 @@ export default function ProductPreview({ customData, palette, captureRef }: Prod
             disabled={saving}
             aria-label="Lưu ảnh xem trước về máy"
             title="Lưu ảnh"
-            className="rounded-lg p-2 text-ink-muted transition-colors hover:bg-primary-soft hover:text-primary disabled:opacity-50"
+            className="rounded-lg p-1.5 text-ink-muted transition-colors hover:bg-primary-soft hover:text-primary disabled:opacity-50"
           >
-            <Download className="h-4 w-4" aria-hidden="true" />
+            <Download className="h-3.5 w-3.5" aria-hidden="true" />
           </button>
         </div>
       </div>
 
-      <div ref={captureRef} className="rounded-xl bg-cream p-4">
-        <ClickerTray keys={customData.keys} palette={palette} switchType={customData.switchType} />
+      <div
+        ref={captureRef}
+        className={compact ? 'rounded-2xl bg-white px-2 py-3 sm:px-5' : 'rounded-xl bg-cream p-4'}
+      >
+        <ClickerTray
+          keys={customData.keys}
+          palette={palette}
+          switchType={customData.switchType}
+          showMeta={!compact}
+        />
       </div>
 
-      <p className="mt-3 text-center text-xs text-ink-muted">
-        Bản xem trước mô phỏng bố cục và màu sắc. Màu in thực tế có thể lệch nhẹ.
-      </p>
+      {!compact ? (
+        <p className="mt-3 text-center text-xs text-ink-muted">
+          Bản xem trước mô phỏng bố cục và màu sắc. Màu in thực tế có thể lệch nhẹ.
+        </p>
+      ) : null}
 
       <Modal
         open={zoomed}
@@ -82,7 +100,12 @@ export default function ProductPreview({ customData, palette, captureRef }: Prod
         title="Xem trước thiết kế"
         footer={
           <div className="flex justify-end gap-2">
-            <Button variant="secondary" onClick={handleDownload} loading={saving} icon={<Download className="h-4 w-4" />}>
+            <Button
+              variant="secondary"
+              onClick={handleDownload}
+              loading={saving}
+              icon={<Download className="h-4 w-4" />}
+            >
               Lưu ảnh
             </Button>
             <Button onClick={() => setZoomed(false)}>Đóng</Button>
@@ -90,7 +113,11 @@ export default function ProductPreview({ customData, palette, captureRef }: Prod
         }
       >
         <div className="rounded-xl bg-cream p-6">
-          <ClickerTray keys={customData.keys} palette={palette} switchType={customData.switchType} />
+          <ClickerTray
+            keys={customData.keys}
+            palette={palette}
+            switchType={customData.switchType}
+          />
         </div>
       </Modal>
     </div>

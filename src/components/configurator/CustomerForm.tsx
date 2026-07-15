@@ -2,7 +2,7 @@
 import { AlertCircle } from 'lucide-react';
 import { LIMITS } from '../../../shared/constants';
 import { filterPhoneInput } from '../../utils/validation';
-import Card, { CardTitle } from '../ui/Card';
+import { CardTitle } from '../ui/Card';
 
 export interface CustomerFormValues {
   fullName: string;
@@ -106,7 +106,7 @@ export default function CustomerForm({ values, errors, onChange, disabled }: Cus
     onChange({ ...values, [key]: value });
 
   return (
-    <Card>
+    <section className="border-t border-line pt-7">
       <CardTitle hint="Shop gọi xác nhận trước khi làm hàng, nên số điện thoại cần chính xác.">
         Thông tin nhận hàng
       </CardTitle>
@@ -265,6 +265,6 @@ export default function CustomerForm({ values, errors, onChange, disabled }: Cus
           ) : null}
         </div>
       </div>
-    </Card>
+    </section>
   );
 }

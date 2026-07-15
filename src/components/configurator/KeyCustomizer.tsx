@@ -4,7 +4,7 @@ import { countGraphemes, sliceGraphemes } from '../../../shared/sanitize';
 import type { KeyItem } from '../../../shared/orderSchema';
 import type { ColorPalette, ProductConfig } from '../../types/product';
 import { getIconComponent } from '../../utils/icons';
-import Card, { CardTitle } from '../ui/Card';
+import { CardTitle } from '../ui/Card';
 
 interface KeyCustomizerProps {
   product: ProductConfig;
@@ -54,7 +54,7 @@ export default function KeyCustomizer({
   const visibleKeys = keys.slice(0, characterCount);
 
   return (
-    <Card>
+    <section>
       <CardTitle hint={`Tối đa ${LIMITS.keyTextMaxLength} ký tự — chữ cái, số, emoji đều được 🎉`}>
         Nội dung từng phím
       </CardTitle>
@@ -218,6 +218,6 @@ export default function KeyCustomizer({
           );
         })}
       </ul>
-    </Card>
+    </section>
   );
 }

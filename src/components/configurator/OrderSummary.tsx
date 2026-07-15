@@ -2,7 +2,7 @@ import { Minus, Pencil, Plus } from 'lucide-react';
 import type { ClickerCustomData } from '../../../shared/orderSchema';
 import type { ColorPalette, ProductConfig } from '../../types/product';
 import { formatVnd } from '../../utils/currency';
-import Card, { CardTitle } from '../ui/Card';
+import { CardTitle } from '../ui/Card';
 
 interface OrderSummaryProps {
   product: ProductConfig;
@@ -35,7 +35,7 @@ export default function OrderSummary({
   onEditStep,
 }: OrderSummaryProps) {
   return (
-    <Card>
+    <section>
       <div className="mb-4 flex items-start justify-between gap-3">
         <CardTitle hint="Kiểm tra kỹ trước khi đặt — nội dung đã in không sửa được.">
           Tóm tắt đơn hàng
@@ -70,7 +70,9 @@ export default function OrderSummary({
             >
               <span className="text-ink-muted">Phím {index + 1}:</span>
               <span className="truncate font-medium">
-                {key.type === 'text' ? key.value : product.icons.find((i) => i.id === key.iconId)?.label}
+                {key.type === 'text'
+                  ? key.value
+                  : product.icons.find((i) => i.id === key.iconId)?.label}
               </span>
             </li>
           ))}
@@ -118,6 +120,6 @@ export default function OrderSummary({
       <p className="mt-3 text-xs text-ink-muted">
         Phí ship chưa gồm trong tổng trên. Shop báo phí cụ thể khi gọi xác nhận đơn.
       </p>
-    </Card>
+    </section>
   );
 }

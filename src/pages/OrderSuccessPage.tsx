@@ -98,7 +98,9 @@ export default function OrderSuccessPage() {
             </div>
             <div className="flex justify-between gap-4 border-t border-line pt-2">
               <dt className="font-medium">Tổng tiền sản phẩm</dt>
-              <dd className="font-display text-lg font-bold text-primary">{formatVnd(order.total)}</dd>
+              <dd className="font-display text-lg font-bold text-primary">
+                {formatVnd(order.total)}
+              </dd>
             </div>
           </dl>
         ) : null}
@@ -108,13 +110,15 @@ export default function OrderSuccessPage() {
           <div className="mt-5 flex items-start gap-2 rounded-xl border border-amber-200 bg-amber-50 p-3.5 text-left">
             <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-600" aria-hidden="true" />
             <p className="text-xs text-amber-900">
-              Đơn của bạn <strong>đã được ghi nhận</strong> và không bị mất. Hệ thống đang chờ đồng bộ
-              sang phần mềm quản lý của shop, nên thời gian xác nhận có thể lâu hơn bình thường một
-              chút.
+              Đơn của bạn <strong>đã được ghi nhận</strong> và không bị mất. Hệ thống đang chờ đồng
+              bộ sang phần mềm quản lý của shop, nên thời gian xác nhận có thể lâu hơn bình thường
+              một chút.
             </p>
           </div>
         ) : order ? (
-          <p className="mt-5 text-xs text-ink-muted">Đơn đã được chuyển sang hệ thống xử lý của shop.</p>
+          <p className="mt-5 text-xs text-ink-muted">
+            Đơn đã được chuyển sang hệ thống xử lý của shop.
+          </p>
         ) : null}
 
         {/* Hành động */}

@@ -62,7 +62,10 @@ function StatusTimeline({ status }: { status: OrderStatus }) {
 
   return (
     <ol className="relative space-y-4 pl-6">
-      <span className="absolute left-[7px] top-2 h-[calc(100%-1rem)] w-px bg-line" aria-hidden="true" />
+      <span
+        className="absolute left-[7px] top-2 h-[calc(100%-1rem)] w-px bg-line"
+        aria-hidden="true"
+      />
       {ORDER_STATUS_FLOW.map((flowStatus, index) => {
         const done = currentIndex >= 0 && index <= currentIndex;
         const active = index === currentIndex;
@@ -78,11 +81,15 @@ function StatusTimeline({ status }: { status: OrderStatus }) {
             >
               {done ? <Check className="h-2.5 w-2.5 text-white" /> : null}
             </span>
-            <p className={`text-sm ${active ? 'font-semibold text-primary' : done ? 'text-ink' : 'text-ink-muted'}`}>
+            <p
+              className={`text-sm ${active ? 'font-semibold text-primary' : done ? 'text-ink' : 'text-ink-muted'}`}
+            >
               {ORDER_STATUS_LABELS[flowStatus]}
             </p>
             {active ? (
-              <p className="mt-0.5 text-xs text-ink-muted">{ORDER_STATUS_DESCRIPTIONS[flowStatus]}</p>
+              <p className="mt-0.5 text-xs text-ink-muted">
+                {ORDER_STATUS_DESCRIPTIONS[flowStatus]}
+              </p>
             ) : null}
           </li>
         );
@@ -130,7 +137,9 @@ export default function OrderDetailView({ order }: { order: OrderView }) {
             </div>
             <div className="flex items-baseline justify-between gap-4 py-2">
               <dt className="text-sm font-medium">Tổng tiền</dt>
-              <dd className="font-display text-lg font-bold text-primary">{formatVnd(order.total)}</dd>
+              <dd className="font-display text-lg font-bold text-primary">
+                {formatVnd(order.total)}
+              </dd>
             </div>
           </dl>
         ) : null}
@@ -153,7 +162,10 @@ export default function OrderDetailView({ order }: { order: OrderView }) {
           <CardTitle>Nội dung từng phím</CardTitle>
           <ul className="grid grid-cols-2 gap-1.5 sm:grid-cols-3">
             {item.customData.keys.map((key, index) => (
-              <li key={index} className="flex items-center gap-2 rounded-lg bg-cream px-2.5 py-1.5 text-xs">
+              <li
+                key={index}
+                className="flex items-center gap-2 rounded-lg bg-cream px-2.5 py-1.5 text-xs"
+              >
                 <span className="text-ink-muted">Phím {index + 1}:</span>
                 <span className="truncate font-medium">
                   {key.type === 'text' ? key.value : key.iconId.toUpperCase()}
@@ -173,7 +185,9 @@ export default function OrderDetailView({ order }: { order: OrderView }) {
         <CardTitle>Địa chỉ nhận hàng</CardTitle>
         <p className="text-sm font-medium">{order.customerName}</p>
         <p className="mt-1 text-sm text-ink-muted">
-          {[order.addressDetail, order.ward, order.district, order.province].filter(Boolean).join(', ')}
+          {[order.addressDetail, order.ward, order.district, order.province]
+            .filter(Boolean)
+            .join(', ')}
         </p>
       </Card>
     </div>
