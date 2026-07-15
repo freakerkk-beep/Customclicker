@@ -1,0 +1,19 @@
+[build]
+  command = "npm run build"
+  publish = "dist"
+  functions = "netlify/functions"
+
+[build.environment]
+  NODE_VERSION = "20"
+
+[functions]
+  # esbuild tự đi theo các import tương đối, kể cả khi function import từ
+  # `shared/` và `src/products/` nằm ngoài thư mục netlify/functions.
+  node_bundler = "esbuild"
+
+# SPA fallback: mọi đường dẫn không phải file tĩnh / function đều do React Router xử lý.
+# Đặt SAU cùng để không nuốt mất /.netlify/functions/*.
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

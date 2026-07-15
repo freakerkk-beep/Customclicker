@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" width="800" height="600" role="img" aria-label="Custom Clicker Raccoonie — Milk Tea">
+  <rect width="800" height="600" fill="#FFF9F3"/>
+  <rect x="110" y="230" width="580" height="150" rx="26" fill="#C9A227"/>
+  <g fill="#EBD9C3">
+    <rect x="140" y="258" width="94" height="94" rx="16"/>
+    <rect x="250" y="258" width="94" height="94" rx="16"/>
+    <rect x="360" y="258" width="94" height="94" rx="16"/>
+    <rect x="470" y="258" width="94" height="94" rx="16"/>
+    <rect x="580" y="258" width="80" height="94" rx="16"/>
+  </g>
+  <g fill="#5F3B22" font-family="sans-serif" font-size="34" font-weight="700" text-anchor="middle">
+    <text x="187" y="317">R</text>
+    <text x="297" y="317">A</text>
+    <text x="407" y="317">C</text>
+    <text x="517" y="317">C</text>
+    <text x="620" y="317">!</text>
+  </g>
+  <text x="400" y="450" font-family="sans-serif" font-size="22" fill="#8A736E" text-anchor="middle">Custom Clicker Raccoonie — Milk Tea</text>
+  <text x="400" y="482" font-family="sans-serif" font-size="16" fill="#C4ADA6" text-anchor="middle">Ảnh tạm — thay bằng ảnh chụp thật trong public/products/custom-clicker/</text>
+</svg>

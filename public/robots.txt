@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+
+# Trang tra cứu đơn không cần index
+Disallow: /order/
+Disallow: /order-success/
+
+Sitemap: https://raccoonie-custom-clicker.netlify.app/sitemap.xml
