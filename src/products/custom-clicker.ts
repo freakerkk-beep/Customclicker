@@ -1,3 +1,4 @@
+import { CLICKER_ICON_CATALOG } from '../../shared/icons';
 import { CLICKER_PRICING } from '../../shared/pricing';
 import type { ProductConfig } from '../types/product';
 
@@ -23,7 +24,10 @@ export const customClickerProduct: ProductConfig = {
 
   images: [
     // Thay ảnh thật vào public/products/custom-clicker/ và sửa đường dẫn tại đây.
-    { src: '/products/custom-clicker/clicker-1.svg', alt: 'Custom Clicker Raccoonie bộ màu Milk Tea Pastel' },
+    {
+      src: '/products/custom-clicker/clicker-1.svg',
+      alt: 'Custom Clicker Raccoonie bộ màu Milk Tea Pastel',
+    },
     { src: '/products/custom-clicker/clicker-2.svg', alt: 'Custom Clicker bộ màu Taro Sweet' },
     { src: '/products/custom-clicker/clicker-3.svg', alt: 'Custom Clicker bộ màu Honey Vanilla' },
   ],
@@ -35,8 +39,8 @@ export const customClickerProduct: ProductConfig = {
   /**
    * BẢY BỘ MÀU — lấy đúng theo web cũ của Raccoonie.
    *
-   * Màu được ĐO TRỰC TIẾP từ ảnh chụp web cũ (từng pixel của đế / phím / chữ),
-   * không phải ước lượng bằng mắt, nên khay xem trước hiện đúng như bản đang bán.
+   * Mã màu được đồng bộ chính xác theo file index.html mẫu do shop cung cấp,
+   * để phần chọn màu và khay xem trước hoạt động giống bản demo.
    *
    * `code` là mã vật liệu theo thứ tự đế/phím/chữ. Lưu ý: mã chỉ dùng để hiển
    * thị và trao đổi với xưởng — KHÔNG dùng mã để suy ra màu, vì cùng một mã khi
@@ -47,72 +51,61 @@ export const customClickerProduct: ProductConfig = {
       id: 'milk-tea-pastel',
       name: 'Milk Tea Pastel',
       code: 'M05/M06/M05',
-      tray: '#B93338',
-      key: '#F1BAC4',
-      text: '#7E2934',
+      tray: '#C23B3B',
+      key: '#F3C2CB',
+      text: '#8A2E3A',
     },
     {
       id: 'matcha-cream',
       name: 'Matcha Cream',
       code: 'M15/M02/M15',
-      tray: '#53633F',
-      key: '#F6F3EC',
-      text: '#414F31',
+      tray: '#5E6E45',
+      key: '#F7F5EE',
+      text: '#4A5A36',
     },
     {
       id: 'cherry-cream',
       name: 'Cherry Cream',
       code: 'M16/M05/M02',
-      tray: '#E9DAC0',
-      key: '#981C21',
-      text: '#FDF4EC',
+      tray: '#ECDFC6',
+      key: '#A31F1F',
+      text: '#FDF6EE',
     },
     {
       id: 'black-white-classic',
       name: 'Black White Classic',
       code: 'M10/M02/M10',
-      tray: '#1D1D1D',
-      key: '#F3EEE5',
-      text: '#1D1D1D',
+      tray: '#1F1F1F',
+      key: '#F5F0E8',
+      text: '#1F1F1F',
     },
     {
       id: 'taro-sweet',
       name: 'Taro Sweet',
       code: 'M02/M17/M13',
-      tray: '#F3EEE5',
-      key: '#B19CCE',
-      text: '#C09726',
+      tray: '#F5F0E8',
+      key: '#B9A6D6',
+      text: '#C8A200',
     },
     {
       id: 'orange-pop',
       name: 'Orange Pop',
       code: 'M03/M04/M02',
-      tray: '#9EC6A8',
-      key: '#E36B34',
-      text: '#FFF3E8',
+      tray: '#A8CDB0',
+      key: '#E8772E',
+      text: '#FFF5EA',
     },
     {
       id: 'honey-vanilla',
       name: 'Honey Vanilla',
       code: 'M02/S16/S19',
-      tray: '#F3EEE5',
-      key: '#E4C04F',
-      text: '#4F3A20',
+      tray: '#F5F0E8',
+      key: '#E8C84A',
+      text: '#5A4220',
     },
   ],
 
-  icons: [
-    { id: 'heart', label: 'Trái tim' },
-    { id: 'star', label: 'Ngôi sao' },
-    { id: 'smile', label: 'Mặt cười' },
-    { id: 'flower', label: 'Hoa' },
-    { id: 'music', label: 'Nốt nhạc' },
-    { id: 'paw', label: 'Bàn chân' },
-    { id: 'crown', label: 'Vương miện' },
-    { id: 'bolt', label: 'Tia chớp' },
-    { id: 'sun', label: 'Mặt trời' },
-    { id: 'moon', label: 'Mặt trăng' },
-  ],
+  icons: CLICKER_ICON_CATALOG.map((icon) => ({ ...icon })),
 
   switches: [
     {

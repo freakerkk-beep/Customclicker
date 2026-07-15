@@ -16,7 +16,8 @@
     "format": "prettier --write \"**/*.{ts,tsx,css,md,json}\"",
     "format:check": "prettier --check \"**/*.{ts,tsx,css,md,json}\"",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "verify": "npm run typecheck && npm run lint && npm test && npm run build"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.45.4",

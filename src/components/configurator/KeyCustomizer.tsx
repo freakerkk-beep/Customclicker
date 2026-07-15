@@ -55,9 +55,7 @@ export default function KeyCustomizer({
 
   return (
     <Card>
-      <CardTitle
-        hint={`Tối đa ${LIMITS.keyTextMaxLength} ký tự — chữ cái, số, emoji đều được 🎉`}
-      >
+      <CardTitle hint={`Tối đa ${LIMITS.keyTextMaxLength} ký tự — chữ cái, số, emoji đều được 🎉`}>
         Nội dung từng phím
       </CardTitle>
 
@@ -106,11 +104,14 @@ export default function KeyCustomizer({
                       onClick={() =>
                         onSetKey(index, {
                           type: 'icon',
-                          iconId: item.type === 'icon' ? item.iconId : (product.icons[0]?.id ?? 'heart'),
+                          iconId:
+                            item.type === 'icon' ? item.iconId : (product.icons[0]?.id ?? 'heart'),
                         })
                       }
                       className={`flex items-center gap-1 rounded-md px-2.5 py-1 text-xs font-medium transition-colors ${
-                        !isText ? 'bg-primary text-white' : 'text-ink-muted hover:bg-primary-soft/50'
+                        !isText
+                          ? 'bg-primary text-white'
+                          : 'text-ink-muted hover:bg-primary-soft/50'
                       }`}
                     >
                       ♥ Icon
@@ -145,12 +146,18 @@ export default function KeyCustomizer({
                       <div className="mt-1 flex items-center justify-between gap-2">
                         {tooLong ? (
                           <span className="field-error">
-                            <AlertCircle className="mt-0.5 h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+                            <AlertCircle
+                              className="mt-0.5 h-3.5 w-3.5 shrink-0"
+                              aria-hidden="true"
+                            />
                             Tối đa {LIMITS.keyTextMaxLength} ký tự.
                           </span>
                         ) : onlySpaces ? (
                           <span className="field-error">
-                            <AlertCircle className="mt-0.5 h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+                            <AlertCircle
+                              className="mt-0.5 h-3.5 w-3.5 shrink-0"
+                              aria-hidden="true"
+                            />
                             Nội dung không thể chỉ có khoảng trắng.
                           </span>
                         ) : (
@@ -182,13 +189,14 @@ export default function KeyCustomizer({
                             title={icon.label}
                             aria-label={icon.label}
                             onClick={() => onSetKey(index, { type: 'icon', iconId: icon.id })}
-                            className={`flex h-9 w-9 items-center justify-center rounded-lg border transition-colors ${
+                            className={`flex h-10 w-10 items-center justify-center rounded-lg border transition-all ${
                               selected
-                                ? 'border-primary bg-primary text-white'
-                                : 'border-line bg-white text-ink-muted hover:border-primary/40 hover:text-primary'
+                                ? 'border-primary bg-primary-soft/70 shadow-soft ring-2 ring-primary/20'
+                                : 'border-line bg-white hover:border-primary/40 hover:bg-primary-soft/30'
                             }`}
+                            style={{ color: palette?.text ?? '#5F3B22' }}
                           >
-                            <Icon className="h-4 w-4" aria-hidden="true" />
+                            <Icon className="h-5 w-5" aria-hidden="true" />
                           </button>
                         );
                       })}

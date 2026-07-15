@@ -37,16 +37,24 @@ function reconcile(state: DesignState, product: ProductConfig): DesignState {
   while (keys.length < maxCharacters) keys.push(emptyKey());
 
   return {
-    characterCount: Math.min(Math.max(state.characterCount ?? minCharacters, minCharacters), maxCharacters),
+    characterCount: Math.min(
+      Math.max(state.characterCount ?? minCharacters, minCharacters),
+      maxCharacters,
+    ),
     colorPaletteId: product.palettes.some((p) => p.id === state.colorPaletteId)
       ? state.colorPaletteId
       : (product.palettes[0]?.id ?? ''),
     switchType: product.switches.some((s) => s.id === state.switchType)
       ? state.switchType
       : (product.switches[0]?.id ?? 'clicky'),
-    keys: keys.map((key) =>
-      key && (key.type === 'text' || key.type === 'icon') ? key : emptyKey(),
-    ),
+    keys: keys.map((key) => {
+      if (!key) return emptyKey();
+      if (key.type === 'text') return key;
+      if (key.type === 'icon' && product.icons.some((icon) => icon.id === key.iconId)) return key;
+      // Bản nháp cũ có icon đã bị loại khỏi danh mục: xoá nội dung để khách chọn lại,
+      // tránh preview trống hoặc backend từ chối đơn.
+      return emptyKey();
+    }),
     quantity: Math.min(Math.max(state.quantity ?? 1, 1), 20),
   };
 }

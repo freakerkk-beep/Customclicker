@@ -5,9 +5,10 @@ import { calculateProductPrice } from '../utils/pricing';
 import { formatVnd } from '../utils/currency';
 import Button from '../components/ui/Button';
 import ClickerTray from '../components/configurator/ClickerTray';
+import type { KeyItem } from '../../shared/orderSchema';
 
 /** Khay mẫu ở hero — dựng bằng chính component preview thật, không phải ảnh. */
-const HERO_KEYS = [
+const HERO_KEYS: KeyItem[] = [
   { type: 'text' as const, value: 'R' },
   { type: 'text' as const, value: 'A' },
   { type: 'icon' as const, iconId: 'heart' },
@@ -58,11 +59,7 @@ export default function HomePage() {
         </div>
 
         <div className="rounded-xl2 border border-line bg-white p-6 shadow-soft sm:p-8">
-          <ClickerTray
-            keys={HERO_KEYS}
-            palette={featured?.palettes[0]}
-            switchType="clicky"
-          />
+          <ClickerTray keys={HERO_KEYS} palette={featured?.palettes[0]} switchType="clicky" />
         </div>
       </section>
 
@@ -77,7 +74,9 @@ export default function HomePage() {
           <div className="card-surface p-10 text-center">
             <Palette className="mx-auto h-8 w-8 text-ink-muted" aria-hidden="true" />
             <p className="mt-3 font-medium">Chưa có sản phẩm nào đang mở bán</p>
-            <p className="mt-1 text-sm text-ink-muted">Bạn quay lại sau nhé, Raccoonie đang chuẩn bị hàng mới.</p>
+            <p className="mt-1 text-sm text-ink-muted">
+              Bạn quay lại sau nhé, Raccoonie đang chuẩn bị hàng mới.
+            </p>
           </div>
         ) : (
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
@@ -97,11 +96,15 @@ export default function HomePage() {
                 </div>
                 <div className="p-5">
                   <h3 className="font-display text-lg font-semibold">{product.name}</h3>
-                  <p className="mt-1 line-clamp-2 text-sm text-ink-muted">{product.shortDescription}</p>
+                  <p className="mt-1 line-clamp-2 text-sm text-ink-muted">
+                    {product.shortDescription}
+                  </p>
                   <p className="mt-3 text-sm">
                     <span className="text-ink-muted">Từ </span>
                     <span className="font-display text-lg font-bold text-primary">
-                      {formatVnd(calculateProductPrice(product.pricing.minCharacters, product.pricing))}
+                      {formatVnd(
+                        calculateProductPrice(product.pricing.minCharacters, product.pricing),
+                      )}
                     </span>
                   </p>
                 </div>

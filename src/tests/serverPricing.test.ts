@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import { buildKeyLabels, priceOrder, validateCustomDataAgainstProduct } from '../../netlify/functions/lib/orderBuilder';
+import {
+  buildKeyLabels,
+  priceOrder,
+  validateCustomDataAgainstProduct,
+} from '../../netlify/functions/lib/orderBuilder';
 import { customClickerProduct } from '../products/custom-clicker';
 import type { ClickerCustomData } from '../../shared/orderSchema';
 
@@ -29,7 +33,11 @@ describe('backend không tin giá do frontend gửi lên', () => {
   });
 
   it('nhân đúng theo số lượng', () => {
-    const result = priceOrder(makeData({ characterCount: 3, keys: makeData().keys.slice(0, 3) }), customClickerProduct, 3);
+    const result = priceOrder(
+      makeData({ characterCount: 3, keys: makeData().keys.slice(0, 3) }),
+      customClickerProduct,
+      3,
+    );
     expect(result.unitPrice).toBe(79_000);
     expect(result.subtotal).toBe(237_000);
   });
@@ -46,13 +54,16 @@ describe('validateCustomDataAgainstProduct', () => {
 
   it('từ chối bộ màu không có trong cấu hình sản phẩm', () => {
     expect(() =>
-      validateCustomDataAgainstProduct(makeData({ colorPaletteId: 'hacker-gold' }), customClickerProduct),
+      validateCustomDataAgainstProduct(
+        makeData({ colorPaletteId: 'hacker-gold' }),
+        customClickerProduct,
+      ),
     ).toThrow(/Bộ màu không hợp lệ/);
   });
 
   it('từ chối icon không có trong cấu hình sản phẩm', () => {
     const data = makeData();
-    data.keys[2] = { type: 'icon', iconId: 'skull' };
+    data.keys[2] = { type: 'icon', iconId: 'skull' as never };
     expect(() => validateCustomDataAgainstProduct(data, customClickerProduct)).toThrow(/Icon/);
   });
 
@@ -64,7 +75,10 @@ describe('validateCustomDataAgainstProduct', () => {
 
   it('từ chối số ký tự ngoài khoảng 3–12', () => {
     expect(() =>
-      validateCustomDataAgainstProduct(makeData({ characterCount: 2, keys: makeData().keys.slice(0, 2) }), customClickerProduct),
+      validateCustomDataAgainstProduct(
+        makeData({ characterCount: 2, keys: makeData().keys.slice(0, 2) }),
+        customClickerProduct,
+      ),
     ).toThrow(/Số ký tự/);
   });
 });

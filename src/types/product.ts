@@ -1,17 +1,8 @@
+import type { ClickerIconId } from '../../shared/icons';
 import type { PricingConfig } from '../../shared/pricing';
 
 /** ID icon được phép in lên phím. Lưu bằng ID, không bao giờ lưu HTML. */
-export type IconId =
-  | 'heart'
-  | 'star'
-  | 'smile'
-  | 'flower'
-  | 'music'
-  | 'paw'
-  | 'crown'
-  | 'bolt'
-  | 'sun'
-  | 'moon';
+export type IconId = ClickerIconId;
 
 export type SwitchType = 'clicky' | 'smooth';
 

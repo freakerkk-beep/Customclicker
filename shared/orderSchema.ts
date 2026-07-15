@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { LIMITS } from './constants';
+import { CLICKER_ICON_IDS } from './icons';
 import { normalizePhone, VN_PHONE_REGEX } from './phone';
 import { collapseWhitespace, countGraphemes, sanitizeText, sliceGraphemes } from './sanitize';
 
@@ -38,7 +39,9 @@ export const keyItemSchema = z.discriminatedUnion('type', [
   }),
   z.object({
     type: z.literal('icon'),
-    iconId: z.string().min(1, 'Phím chưa chọn icon.').max(32),
+    iconId: z.enum(CLICKER_ICON_IDS, {
+      errorMap: () => ({ message: 'Icon không hợp lệ.' }),
+    }),
   }),
 ]);
 

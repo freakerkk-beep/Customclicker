@@ -26,9 +26,13 @@ export function validateCustomDataAgainstProduct(
   const { minCharacters, maxCharacters } = product.pricing;
 
   if (data.characterCount < minCharacters || data.characterCount > maxCharacters) {
-    throw new BusinessError('INVALID_CHARACTER_COUNT', `Số ký tự phải từ ${minCharacters} đến ${maxCharacters}.`, {
-      'customData.characterCount': `Số ký tự phải từ ${minCharacters} đến ${maxCharacters}.`,
-    });
+    throw new BusinessError(
+      'INVALID_CHARACTER_COUNT',
+      `Số ký tự phải từ ${minCharacters} đến ${maxCharacters}.`,
+      {
+        'customData.characterCount': `Số ký tự phải từ ${minCharacters} đến ${maxCharacters}.`,
+      },
+    );
   }
 
   if (data.keys.length !== data.characterCount) {
@@ -83,5 +87,7 @@ export function priceOrder(data: ClickerCustomData, product: ProductConfig, quan
 
 /** Nội dung từng phím dưới dạng text để đưa vào ghi chú Pancake. */
 export function buildKeyLabels(data: ClickerCustomData): string[] {
-  return data.keys.map((key) => (key.type === 'text' ? key.value : key.iconId.toUpperCase()));
+  return data.keys.map((key) =>
+    key.type === 'text' ? key.value : key.iconId.replace(/_/g, ' ').toUpperCase(),
+  );
 }

@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import { AlertCircle } from 'lucide-react';
 import { LIMITS } from '../../../shared/constants';
 import { filterPhoneInput } from '../../utils/validation';
@@ -70,7 +71,11 @@ function Field({
     <div>
       <label htmlFor={id} className="field-label">
         {label}
-        {required ? <span className="ml-0.5 text-red-500">*</span> : <span className="ml-1 text-xs font-normal text-ink-muted">(không bắt buộc)</span>}
+        {required ? (
+          <span className="ml-0.5 text-red-500">*</span>
+        ) : (
+          <span className="ml-1 text-xs font-normal text-ink-muted">(không bắt buộc)</span>
+        )}
       </label>
       <input
         id={id}

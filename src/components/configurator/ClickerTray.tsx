@@ -16,6 +16,7 @@ const FALLBACK: ColorPalette = {
   tray: '#C9A227',
   key: '#EBD9C3',
   text: '#5F3B22',
+  code: 'FALLBACK',
 };
 
 /**
@@ -65,7 +66,8 @@ export default function ClickerTray({ keys, palette, switchType }: ClickerTrayPr
         style={{
           ...trayStyle,
           // Vành khay: gờ sáng trên, bóng đổ dưới cho có khối.
-          boxShadow: 'inset 0 2px 6px rgba(255,255,255,0.35), inset 0 -3px 8px rgba(0,0,0,0.18), 0 6px 22px rgba(122,55,50,0.15)',
+          boxShadow:
+            'inset 0 2px 6px rgba(255,255,255,0.35), inset 0 -3px 8px rgba(0,0,0,0.18), 0 6px 22px rgba(122,55,50,0.15)',
         }}
       >
         <div className="flex w-full items-end" style={{ gap: `${gap}cqw` }}>
@@ -110,9 +112,7 @@ export default function ClickerTray({ keys, palette, switchType }: ClickerTrayPr
       </div>
 
       <div className="mt-3 flex flex-wrap items-center justify-center gap-2 text-xs text-ink-muted">
-        <span className="rounded-full bg-white px-2.5 py-1 shadow-soft">
-          {keys.length} phím
-        </span>
+        <span className="rounded-full bg-white px-2.5 py-1 shadow-soft">{keys.length} phím</span>
         <span className="rounded-full bg-white px-2.5 py-1 shadow-soft">{colors.name}</span>
         <span className="rounded-full bg-white px-2.5 py-1 shadow-soft">
           Switch {switchType === 'clicky' ? 'Clicky' : 'Smooth'}

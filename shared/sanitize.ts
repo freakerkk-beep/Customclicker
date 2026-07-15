@@ -1,14 +1,17 @@
+/* eslint-disable no-control-regex */
 /**
  * Làm sạch chuỗi do khách nhập trước khi lưu / gửi sang Pancake.
  * Không bao giờ render chuỗi này dưới dạng HTML — chỉ dùng như text.
  */
 export function sanitizeText(input: string, maxLength: number): string {
-  return input
-    // bỏ ký tự điều khiển (giữ lại xuống dòng và tab)
-    .replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/g, '')
-    .replace(/\r\n/g, '\n')
-    .trim()
-    .slice(0, maxLength);
+  return (
+    input
+      // bỏ ký tự điều khiển (giữ lại xuống dòng và tab)
+      .replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/g, '')
+      .replace(/\r\n/g, '\n')
+      .trim()
+      .slice(0, maxLength)
+  );
 }
 
 /** Rút gọn khoảng trắng thừa về 1 dấu cách, dùng cho tên và địa chỉ. */
@@ -27,11 +30,24 @@ export function collapseWhitespace(input: string): string {
  * Trình duyệt hiện đại và Node 20+ đều hỗ trợ; nếu không có thì lùi về đếm
  * theo code point (vẫn đúng với đa số emoji đơn).
  */
+interface GraphemeSegment {
+  segment: string;
+}
+
+interface SegmenterInstance {
+  segment(input: string): Iterable<GraphemeSegment>;
+}
+
+type SegmenterConstructor = new (
+  locale?: string | string[],
+  options?: { granularity: 'grapheme' },
+) => SegmenterInstance;
+
 function segment(input: string): string[] {
-  const Seg = (Intl as unknown as { Segmenter?: typeof Intl.Segmenter }).Segmenter;
+  const Seg = (Intl as unknown as { Segmenter?: SegmenterConstructor }).Segmenter;
   if (typeof Seg === 'function') {
-    const seg = new Seg('vi', { granularity: 'grapheme' });
-    return Array.from(seg.segment(input), (s) => s.segment);
+    const segmenter = new Seg('vi', { granularity: 'grapheme' });
+    return Array.from(segmenter.segment(input), (part) => part.segment);
   }
   return Array.from(input);
 }

@@ -1,7 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import { isValidVnPhone, normalizePhone } from '../../shared/phone';
 import { countGraphemes, sanitizeText, sliceGraphemes } from '../../shared/sanitize';
-import { createOrderRequestSchema, getOrderQuerySchema, keyItemSchema } from '../../shared/orderSchema';
+import {
+  createOrderRequestSchema,
+  getOrderQuerySchema,
+  keyItemSchema,
+} from '../../shared/orderSchema';
 
 describe('normalizePhone / isValidVnPhone', () => {
   it.each([
@@ -93,13 +97,17 @@ describe('createOrderRequestSchema', () => {
         ...validRequest,
         customData: {
           ...validRequest.customData,
-          keys: [{ type: 'text', value: '   ' }, { type: 'text', value: 'B' }, { type: 'text', value: 'C' }],
+          keys: [
+            { type: 'text', value: '   ' },
+            { type: 'text', value: 'B' },
+            { type: 'text', value: 'C' },
+          ],
         },
       }),
     ).toThrow();
   });
 
-  it('từ chối nội dung phím quá 10 ký tự', () => {
+  it('từ chối nội dung phím quá 4 ký tự', () => {
     expect(() =>
       createOrderRequestSchema.parse({
         ...validRequest,
@@ -108,6 +116,22 @@ describe('createOrderRequestSchema', () => {
           keys: [
             { type: 'text', value: 'AAAAAAAAAAAAAAA' },
             { type: 'text', value: 'B' },
+            { type: 'text', value: 'C' },
+          ],
+        },
+      }),
+    ).toThrow();
+  });
+
+  it('từ chối icon không nằm trong 5 icon được phép', () => {
+    expect(() =>
+      createOrderRequestSchema.parse({
+        ...validRequest,
+        customData: {
+          ...validRequest.customData,
+          keys: [
+            { type: 'text', value: 'A' },
+            { type: 'icon', iconId: 'smile' },
             { type: 'text', value: 'C' },
           ],
         },
@@ -134,7 +158,7 @@ describe('createOrderRequestSchema', () => {
   });
 
   it('bắt buộc có idempotencyKey', () => {
-    const { idempotencyKey: _omit, ...withoutKey } = validRequest;
+    const withoutKey = { ...validRequest, idempotencyKey: undefined };
     expect(() => createOrderRequestSchema.parse(withoutKey)).toThrow();
   });
 
