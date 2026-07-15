@@ -51,29 +51,20 @@ export interface PancakeSyncResult {
 export interface PancakeOrderPayload {
   shop_id: string;
   warehouse_id?: string;
-  bill_full_name: string;
-  bill_phone_number: string;
-  bill_email?: string;
   shipping_address: {
     full_name: string;
     phone_number: string;
-    province_name: string;
-    district_name: string;
-    commune_name: string;
     address: string;
-    full_address: string;
+    ward: string;
+    district: string;
+    province: string;
   };
   items: Array<{
-    product_id?: string;
-    variant_id?: string;
+    product_id: string;
+    variation_id: string;
     quantity: number;
-    retail_price: number;
-    note?: string;
   }>;
   note: string;
-  total_discount: number;
-  /** Mã đơn của website, để đối soát hai chiều. */
-  reference_code: string;
   [key: string]: unknown;
 }
 
@@ -117,46 +108,39 @@ export function buildPancakeNote(ctx: PancakeOrderContext): string {
 /**
  * [CẦN CHỈNH THEO TÀI LIỆU PANCAKE — 2/3]
  * Chuyển đơn của website thành payload Pancake.
- * Tên field bên dưới theo Pancake POS API v1. Nếu tài khoản của bạn dùng tên
- * khác, sửa TẠI ĐÂY — không cần đụng vào create-order.ts.
+ * Payload tối giản theo cấu trúc tạo đơn Pancake POS: shipping_address,
+ * items[].product_id, items[].variation_id, quantity, note và warehouse_id.
  */
 export function mapOrderToPancakePayload(ctx: PancakeOrderContext): PancakeOrderPayload {
   const { customer } = ctx;
-  const fullAddress = [customer.addressDetail, customer.ward, customer.district, customer.province]
-    .filter(Boolean)
-    .join(', ');
 
   const productIdKey = ctx.product.pancake?.productIdEnvKey ?? 'PANCAKE_PRODUCT_ID';
   const variantIdKey = ctx.product.pancake?.variantIdEnvKey ?? 'PANCAKE_VARIANT_ID';
+  const productId = process.env[productIdKey] ?? '';
+  const variationId = process.env[variantIdKey] ?? '';
 
   return {
     shop_id: process.env.PANCAKE_SHOP_ID ?? '',
     warehouse_id: process.env.PANCAKE_WAREHOUSE_ID || undefined,
-    bill_full_name: customer.fullName,
-    bill_phone_number: customer.phone,
-    bill_email: customer.email,
     shipping_address: {
       full_name: customer.fullName,
       phone_number: customer.phone,
-      province_name: customer.province,
-      district_name: customer.district,
-      commune_name: customer.ward,
       address: customer.addressDetail,
-      full_address: fullAddress,
+      ward: customer.ward,
+      district: customer.district,
+      province: customer.province,
     },
     items: [
       {
-        product_id: process.env[productIdKey] || undefined,
-        variant_id: process.env[variantIdKey] || undefined,
+        product_id: productId,
+        // Pancake dùng tên trường `variation_id`, không phải `variant_id`.
+        variation_id: variationId,
         quantity: ctx.quantity,
-        retail_price: ctx.unitPrice,
-        // Ghi chú theo từng item để nhân viên xưởng thấy ngay nội dung custom.
-        note: ctx.keyLabels.map((label, i) => `P${i + 1}:${label}`).join(' | '),
       },
     ],
+    // Giá thật và toàn bộ cấu hình custom nằm trong ghi chú.
+    // Biến thể Pancake dùng giá mặc định 79.000đ để ưu tiên tạo đơn ổn định.
     note: buildPancakeNote(ctx),
-    total_discount: 0,
-    reference_code: ctx.orderCode,
   };
 }
 
