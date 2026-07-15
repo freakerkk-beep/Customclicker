@@ -13,8 +13,6 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 const VARIANTS: Record<Variant, string> = {
-  // Nút chính: gradient hồng -> tím giống web cũ.
-  // Dùng brightness khi hover vì gradient không đổi màu bằng hover:bg-* được.
   primary:
     'bg-gradient-to-r from-brandPink to-brandPurple text-white shadow-soft hover:brightness-105 active:brightness-95 disabled:opacity-50',
   secondary:
@@ -38,7 +36,6 @@ export default function Button({
   className = '',
   children,
   disabled,
-  // `type` mặc định của <button> là "submit" — dễ gây submit form ngoài ý muốn.
   type = 'button',
   ...rest
 }: ButtonProps) {
@@ -47,7 +44,7 @@ export default function Button({
       type={type}
       disabled={disabled || loading}
       className={[
-        'inline-flex items-center justify-center font-medium transition-colors',
+        'inline-flex flex-nowrap items-center justify-center whitespace-nowrap font-medium transition-colors',
         'disabled:cursor-not-allowed',
         VARIANTS[variant],
         SIZES[size],

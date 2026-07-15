@@ -5,18 +5,13 @@
 /**
  * FONT CHỮ IN TRÊN PHÍM.
  *
- * Đây là file font khách gửi (Be Vietnam Pro Bold), đặt tại
- * public/fonts/BeVietnamPro-Bold.ttf — KHÔNG tải từ Google Fonts, để chữ trên
- * phím hiển thị đúng y hệt file gốc dùng khi sản xuất.
- *
- * font-display: block -> chờ font tải xong mới vẽ chữ, tránh cảnh khách thấy
- * chữ nhảy font khi đang xem trước thiết kế (quan trọng vì đây là bản xem thử
- * của sản phẩm sẽ được in thật).
+ * Đây là file font khách gửi, đặt tại public/fonts/BeVietnamPro-Black.ttf
+ * để chữ trên phím hiển thị đúng kiểu sản xuất.
  */
 @font-face {
   font-family: 'Clicker Key';
-  src: url('/fonts/BeVietnamPro-Bold.ttf') format('truetype');
-  font-weight: 700;
+  src: url('/fonts/BeVietnamPro-Black.ttf') format('truetype');
+  font-weight: 900;
   font-style: normal;
   font-display: block;
 }
@@ -28,17 +23,9 @@
 
   body {
     @apply text-ink font-sans antialiased;
-    /* Nền gradient hồng -> xanh tím nhạt, lấy theo web cũ.
-       min-height + fixed để gradient phủ hết trang kể cả khi nội dung ngắn. */
-    background: linear-gradient(
-      135deg,
-      theme('colors.pageFrom') 0%,
-      #f2eefd 55%,
-      theme('colors.pageTo') 100%
-    );
+    background: linear-gradient(135deg, theme('colors.pageFrom') 0%, #F2EEFD 55%, theme('colors.pageTo') 100%);
     background-attachment: fixed;
     min-height: 100vh;
-    /* Chặn tràn ngang trên điện thoại. */
     overflow-x: hidden;
   }
 
@@ -48,12 +35,10 @@
     @apply font-display text-ink;
   }
 
-  /* Focus thấy rõ khi dùng bàn phím. */
   :focus-visible {
     @apply outline-none ring-2 ring-primary ring-offset-2 ring-offset-cream;
   }
 
-  /* Tôn trọng người tắt hiệu ứng chuyển động. */
   @media (prefers-reduced-motion: reduce) {
     *,
     *::before,
@@ -90,7 +75,6 @@
   }
 }
 
-/* Vùng an toàn cho thanh cố định dưới đáy trên iPhone. */
 .pb-safe {
   padding-bottom: calc(1rem + env(safe-area-inset-bottom, 0px));
 }

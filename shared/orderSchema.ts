@@ -2,7 +2,12 @@ import { z } from 'zod';
 import { LIMITS } from './constants';
 import { CLICKER_ICON_IDS } from './icons';
 import { normalizePhone, VN_PHONE_REGEX } from './phone';
-import { collapseWhitespace, countGraphemes, sanitizeText, sliceGraphemes } from './sanitize';
+import {
+  collapseWhitespace,
+  countGraphemes,
+  normalizeKeycapText,
+  sanitizeText,
+} from './sanitize';
 
 /**
  * Schema dùng chung. Frontend dùng để báo lỗi sớm cho khách,
@@ -21,21 +26,16 @@ export const keyItemSchema = z.discriminatedUnion('type', [
     type: z.literal('text'),
     value: z
       .string()
-      // Kiểm tra độ dài trước khi cắt chuỗi để dữ liệu quá giới hạn bị từ chối,
-      // thay vì âm thầm rút ngắn nội dung khách đã nhập.
-      .transform((v) => collapseWhitespace(v))
+      .transform((v) => normalizeKeycapText(v, LIMITS.keyTextMaxLength))
       .pipe(
         z
           .string()
           .refine((v) => countGraphemes(v) >= 1, 'Phím chưa có nội dung.')
-          // Đếm theo ký tự nhìn thấy: "🎉" = 1 ký tự, không phải 2.
           .refine(
-            (v) => countGraphemes(v) <= LIMITS.keyTextMaxLength,
-            `Nội dung phím tối đa ${LIMITS.keyTextMaxLength} ký tự.`,
+            (v) => countGraphemes(v) === LIMITS.keyTextMaxLength,
+            'Mỗi phím chỉ được 1 ký tự.',
           ),
-      )
-      // Cắt an toàn (không xé đôi emoji) rồi mới bỏ ký tự điều khiển.
-      .transform((v) => sanitizeText(sliceGraphemes(v, LIMITS.keyTextMaxLength), v.length)),
+      ),
   }),
   z.object({
     type: z.literal('icon'),

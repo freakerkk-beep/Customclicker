@@ -16,7 +16,7 @@ function makeData(overrides: Partial<ClickerCustomData> = {}): ClickerCustomData
       { type: 'text', value: 'A' },
       { type: 'text', value: 'B' },
       { type: 'icon', iconId: 'heart' },
-      { type: 'text', value: 'LINH' },
+      { type: 'text', value: 'D' },
       { type: 'icon', iconId: 'star' },
       { type: 'text', value: 'C' },
     ],
@@ -85,6 +85,6 @@ describe('validateCustomDataAgainstProduct', () => {
 
 describe('buildKeyLabels', () => {
   it('chữ giữ nguyên, icon viết hoa theo ID', () => {
-    expect(buildKeyLabels(makeData())).toEqual(['A', 'B', 'HEART', 'LINH', 'STAR', 'C']);
+    expect(buildKeyLabels(makeData())).toEqual(['A', 'B', 'HEART', 'D', 'STAR', 'C']);
   });
 });

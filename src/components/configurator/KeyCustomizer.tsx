@@ -1,10 +1,10 @@
-import { AlertCircle, Eraser, Type as TypeIcon } from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
+import { Sparkles } from 'lucide-react';
 import { LIMITS } from '../../../shared/constants';
-import { countGraphemes, sliceGraphemes } from '../../../shared/sanitize';
+import { countGraphemes, normalizeKeycapText } from '../../../shared/sanitize';
 import type { KeyItem } from '../../../shared/orderSchema';
 import type { ColorPalette, ProductConfig } from '../../types/product';
 import { getIconComponent } from '../../utils/icons';
-import { CardTitle } from '../ui/Card';
 
 interface KeyCustomizerProps {
   product: ProductConfig;
@@ -12,34 +12,14 @@ interface KeyCustomizerProps {
   characterCount: number;
   palette: ColorPalette | undefined;
   onSetKey: (index: number, key: KeyItem) => void;
-  onClearKey: (index: number) => void;
+  errorMessage?: string;
 }
 
-/** Phím thu nhỏ hiển thị đúng màu đang chọn. */
-function MiniKeyPreview({ item, palette }: { item: KeyItem; palette: ColorPalette | undefined }) {
-  const Icon = item.type === 'icon' ? getIconComponent(item.iconId) : null;
-  const keyColor = palette?.key ?? '#EBD9C3';
-  const textColor = palette?.text ?? '#5F3B22';
-
-  return (
-    <div
-      className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border border-black/5 shadow-sm"
-      style={{ backgroundColor: keyColor }}
-      aria-hidden="true"
-    >
-      {Icon ? (
-        <Icon className="h-5 w-5" style={{ color: textColor }} />
-      ) : (
-        <span
-          className="max-w-full truncate px-1 font-key text-[10px] font-bold leading-none"
-          style={{ color: textColor }}
-        >
-          {item.type === 'text' ? item.value || '—' : '—'}
-        </span>
-      )}
-    </div>
-  );
-}
+const FALLBACK = {
+  tray: '#B93338',
+  key: '#F1BAC4',
+  text: '#7E2934',
+};
 
 export default function KeyCustomizer({
   product,
@@ -47,177 +27,181 @@ export default function KeyCustomizer({
   characterCount,
   palette,
   onSetKey,
-  onClearKey,
+  errorMessage,
 }: KeyCustomizerProps) {
-  // Chỉ hiện đúng số phím khách đang chọn. Phím dư vẫn nằm trong state
-  // (tăng số ký tự lại là có ngay) nhưng không thuộc đơn hàng.
-  const visibleKeys = keys.slice(0, characterCount);
+  const [activeIndex, setActiveIndex] = useState(0);
+
+  useEffect(() => {
+    setActiveIndex((current) => Math.min(current, Math.max(characterCount - 1, 0)));
+  }, [characterCount]);
+
+  const colors = palette ?? { ...FALLBACK, id: 'fallback', name: 'fallback', code: 'fallback' };
+  const visibleKeys = useMemo(() => keys.slice(0, characterCount), [keys, characterCount]);
+  const activeKey = visibleKeys[activeIndex] ?? { type: 'text', value: '' as const };
+  const isText = activeKey.type === 'text';
+  const textValue = isText ? activeKey.value : '';
+  const textLength = countGraphemes(textValue);
+  const emptyText = isText && textLength === 0;
+
+  const setTextMode = () => {
+    const currentValue = activeKey.type === 'text' ? activeKey.value : '';
+    onSetKey(activeIndex, { type: 'text', value: normalizeKeycapText(currentValue, 1) });
+  };
+
+  const setIconMode = () => {
+    const defaultIcon = activeKey.type === 'icon' ? activeKey.iconId : product.icons[0]?.id ?? 'heart';
+    onSetKey(activeIndex, { type: 'icon', iconId: defaultIcon });
+  };
 
   return (
     <section>
-      <CardTitle hint={`Tối đa ${LIMITS.keyTextMaxLength} ký tự — chữ cái, số, emoji đều được 🎉`}>
-        Nội dung từng phím
-      </CardTitle>
+      <div className="text-center">
+        <p className="text-sm font-semibold text-ink-muted">Đang chỉnh Phím {activeIndex + 1} ✏️</p>
+      </div>
 
-      <ul className="space-y-3">
-        {visibleKeys.map((item, index) => {
-          const isText = item.type === 'text';
-          const textValue = isText ? item.value : '';
-          // Đếm theo ký tự nhìn thấy để 1 emoji = 1 ký tự.
-          const textLength = countGraphemes(textValue);
-          const tooLong = textLength > LIMITS.keyTextMaxLength;
-          const onlySpaces = isText && textValue.length > 0 && textValue.trim().length === 0;
-          const inputId = `key-${index}-text`;
+      <div className="mx-auto mt-4 w-full max-w-[420px] rounded-[28px] px-4 py-5" style={{ backgroundColor: colors.tray }}>
+        <div className="flex items-end justify-center gap-2">
+          {visibleKeys.map((item, index) => {
+            const Icon = item.type === 'icon' ? getIconComponent(item.iconId) : null;
+            const selected = index === activeIndex;
+            const text = item.type === 'text' ? item.value : '';
 
-          return (
-            <li key={index} className="rounded-xl border border-line bg-white p-3">
-              <div className="flex items-start gap-3">
-                <span className="mt-2.5 w-6 shrink-0 text-center text-sm font-semibold text-ink-muted">
-                  {index + 1}
-                </span>
-
-                <MiniKeyPreview item={item} palette={palette} />
-
-                <div className="min-w-0 flex-1">
-                  {/* Chọn kiểu nội dung: chữ hoặc icon */}
-                  <div
-                    className="mb-2 inline-flex rounded-lg border border-line p-0.5"
-                    role="radiogroup"
-                    aria-label={`Kiểu nội dung phím ${index + 1}`}
+            return (
+              <button
+                key={index}
+                type="button"
+                onClick={() => setActiveIndex(index)}
+                aria-pressed={selected}
+                className={[
+                  'relative flex h-20 w-20 items-center justify-center rounded-[18px] border-2 shadow-[inset_0_-4px_0_rgba(0,0,0,0.12)] transition-all sm:h-24 sm:w-24',
+                  selected ? 'border-white ring-4 ring-primary-soft/80' : 'border-transparent',
+                ].join(' ')}
+                style={{ backgroundColor: colors.key }}
+              >
+                {Icon ? (
+                  <Icon className="h-7 w-7 sm:h-8 sm:w-8" style={{ color: colors.text }} aria-hidden="true" />
+                ) : (
+                  <span
+                    className="font-key text-3xl font-black leading-none sm:text-4xl"
+                    style={{ color: colors.text }}
                   >
-                    <button
-                      type="button"
-                      role="radio"
-                      aria-checked={isText}
-                      onClick={() => onSetKey(index, { type: 'text', value: textValue })}
-                      className={`flex items-center gap-1 rounded-md px-2.5 py-1 text-xs font-medium transition-colors ${
-                        isText ? 'bg-primary text-white' : 'text-ink-muted hover:bg-primary-soft/50'
-                      }`}
-                    >
-                      <TypeIcon className="h-3.5 w-3.5" aria-hidden="true" />
-                      Chữ
-                    </button>
-                    <button
-                      type="button"
-                      role="radio"
-                      aria-checked={!isText}
-                      onClick={() =>
-                        onSetKey(index, {
-                          type: 'icon',
-                          iconId:
-                            item.type === 'icon' ? item.iconId : (product.icons[0]?.id ?? 'heart'),
-                        })
-                      }
-                      className={`flex items-center gap-1 rounded-md px-2.5 py-1 text-xs font-medium transition-colors ${
-                        !isText
-                          ? 'bg-primary text-white'
-                          : 'text-ink-muted hover:bg-primary-soft/50'
-                      }`}
-                    >
-                      ♥ Icon
-                    </button>
-                  </div>
-
-                  {isText ? (
-                    <div>
-                      <label htmlFor={inputId} className="sr-only">
-                        Nội dung phím {index + 1}
-                      </label>
-                      <input
-                        id={inputId}
-                        type="text"
-                        value={textValue}
-                        // Không dùng maxLength của HTML: nó đếm theo code unit nên
-                        // sẽ chặn nhầm khi khách gõ emoji. Cắt bằng sliceGraphemes
-                        // để 1 emoji = 1 ký tự.
-                        onChange={(event) =>
-                          onSetKey(index, {
-                            type: 'text',
-                            value: sliceGraphemes(event.target.value, LIMITS.keyTextMaxLength),
-                          })
-                        }
-                        onBlur={(event) =>
-                          onSetKey(index, { type: 'text', value: event.target.value.trim() })
-                        }
-                        placeholder={`Nội dung phím ${index + 1}`}
-                        className={`field-input py-2 text-sm ${tooLong || onlySpaces ? 'field-input-error' : ''}`}
-                        aria-invalid={tooLong || onlySpaces}
-                      />
-                      <div className="mt-1 flex items-center justify-between gap-2">
-                        {tooLong ? (
-                          <span className="field-error">
-                            <AlertCircle
-                              className="mt-0.5 h-3.5 w-3.5 shrink-0"
-                              aria-hidden="true"
-                            />
-                            Tối đa {LIMITS.keyTextMaxLength} ký tự.
-                          </span>
-                        ) : onlySpaces ? (
-                          <span className="field-error">
-                            <AlertCircle
-                              className="mt-0.5 h-3.5 w-3.5 shrink-0"
-                              aria-hidden="true"
-                            />
-                            Nội dung không thể chỉ có khoảng trắng.
-                          </span>
-                        ) : (
-                          <span />
-                        )}
-                        <span
-                          className={`shrink-0 text-[11px] ${tooLong ? 'text-red-600' : 'text-ink-muted'}`}
-                        >
-                          {textLength}/{LIMITS.keyTextMaxLength}
-                        </span>
-                      </div>
-                    </div>
-                  ) : (
-                    <div
-                      className="flex flex-wrap gap-1.5"
-                      role="radiogroup"
-                      aria-label={`Chọn icon cho phím ${index + 1}`}
-                    >
-                      {product.icons.map((icon) => {
-                        const Icon = getIconComponent(icon.id);
-                        const selected = item.type === 'icon' && item.iconId === icon.id;
-                        if (!Icon) return null;
-                        return (
-                          <button
-                            key={icon.id}
-                            type="button"
-                            role="radio"
-                            aria-checked={selected}
-                            title={icon.label}
-                            aria-label={icon.label}
-                            onClick={() => onSetKey(index, { type: 'icon', iconId: icon.id })}
-                            className={`flex h-10 w-10 items-center justify-center rounded-lg border transition-all ${
-                              selected
-                                ? 'border-primary bg-primary-soft/70 shadow-soft ring-2 ring-primary/20'
-                                : 'border-line bg-white hover:border-primary/40 hover:bg-primary-soft/30'
-                            }`}
-                            style={{ color: palette?.text ?? '#5F3B22' }}
-                          >
-                            <Icon className="h-5 w-5" aria-hidden="true" />
-                          </button>
-                        );
-                      })}
-                    </div>
-                  )}
-                </div>
-
-                <button
-                  type="button"
-                  onClick={() => onClearKey(index)}
-                  aria-label={`Xoá nội dung phím ${index + 1}`}
-                  title="Xoá nội dung"
-                  className="mt-1.5 shrink-0 rounded-lg p-2 text-ink-muted transition-colors hover:bg-red-50 hover:text-red-600"
+                    {text || '·'}
+                  </span>
+                )}
+                <span
+                  className="pointer-events-none absolute bottom-2 right-3 text-[11px] font-bold"
+                  style={{ color: colors.text, opacity: 0.85 }}
                 >
-                  <Eraser className="h-4 w-4" aria-hidden="true" />
+                  S{index + 1}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      <div className="mt-6">
+        <p className="text-sm font-bold uppercase tracking-wide text-brandPurple">
+          Đang chỉnh — Phím {activeIndex + 1}
+        </p>
+
+        <div className="mt-3 grid gap-2 sm:grid-cols-2">
+          <button
+            type="button"
+            onClick={setTextMode}
+            className={[
+              'rounded-2xl border px-4 py-3 text-center text-lg font-semibold transition-all',
+              isText
+                ? 'border-primary bg-primary text-white shadow-soft'
+                : 'border-line bg-white text-primary hover:bg-primary-soft/30',
+            ].join(' ')}
+          >
+            Aa Chữ / Số
+          </button>
+          <button
+            type="button"
+            onClick={setIconMode}
+            className={[
+              'rounded-2xl border px-4 py-3 text-center text-lg font-semibold transition-all',
+              !isText
+                ? 'border-primary bg-primary text-white shadow-soft'
+                : 'border-line bg-white text-primary hover:bg-primary-soft/30',
+            ].join(' ')}
+          >
+            ✦ Icon
+          </button>
+        </div>
+
+        {isText ? (
+          <div className="mt-4">
+            <input
+              type="text"
+              inputMode="text"
+              autoCapitalize="characters"
+              value={textValue}
+              onChange={(event) =>
+                onSetKey(activeIndex, {
+                  type: 'text',
+                  value: normalizeKeycapText(event.target.value, LIMITS.keyTextMaxLength),
+                })
+              }
+              placeholder="A"
+              className={`field-input text-2xl font-key font-black uppercase ${emptyText ? 'field-input-error' : ''}`}
+              aria-invalid={emptyText}
+            />
+            <div className="mt-2 flex items-center justify-between gap-3 text-sm">
+              <p className={emptyText ? 'text-red-600' : 'text-ink-muted'}>
+                {emptyText
+                  ? 'Phím này chưa có nội dung.'
+                  : 'Tự động viết IN HOA. Mỗi phím chỉ 1 ký tự.'}
+              </p>
+              <span className={`shrink-0 font-medium ${emptyText ? 'text-red-600' : 'text-ink-muted'}`}>
+                {textLength}/{LIMITS.keyTextMaxLength}
+              </span>
+            </div>
+          </div>
+        ) : (
+          <div className="mt-4 grid grid-cols-3 gap-3 sm:grid-cols-5" role="radiogroup" aria-label={`Chọn icon cho phím ${activeIndex + 1}`}>
+            {product.icons.map((icon) => {
+              const Icon = getIconComponent(icon.id);
+              const selected = activeKey.type === 'icon' && activeKey.iconId === icon.id;
+              if (!Icon) return null;
+
+              return (
+                <button
+                  key={icon.id}
+                  type="button"
+                  role="radio"
+                  aria-checked={selected}
+                  title={icon.label}
+                  aria-label={icon.label}
+                  onClick={() => onSetKey(activeIndex, { type: 'icon', iconId: icon.id })}
+                  className={[
+                    'flex h-16 items-center justify-center rounded-2xl border transition-all',
+                    selected
+                      ? 'border-primary bg-primary-soft/70 ring-2 ring-primary/20'
+                      : 'border-line bg-white hover:bg-primary-soft/30',
+                  ].join(' ')}
+                  style={{ color: colors.text }}
+                >
+                  <Icon className="h-7 w-7" aria-hidden="true" />
                 </button>
-              </div>
-            </li>
-          );
-        })}
-      </ul>
+              );
+            })}
+          </div>
+        )}
+
+        {errorMessage ? (
+          <p className="mt-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+            {errorMessage}
+          </p>
+        ) : null}
+
+        <div className="mt-4 flex items-center gap-2 rounded-2xl bg-primary-soft/35 px-4 py-3 text-sm text-ink-muted">
+          <Sparkles className="h-4 w-4 shrink-0 text-primary" aria-hidden="true" />
+          Mỗi phím bắt buộc có đúng 1 ký tự hoặc 1 icon.
+        </div>
+      </div>
     </section>
   );
 }

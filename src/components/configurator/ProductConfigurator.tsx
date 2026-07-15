@@ -29,10 +29,10 @@ const STEPS: Step[] = [
 ];
 
 const STEP_DESCRIPTIONS: Record<number, string> = {
-  1: 'Chọn số phím và bộ màu — đế, phím và màu chữ đi cố định cùng nhau.',
-  2: 'Chạm vào từng phím để nhập chữ hoặc chọn icon bạn muốn.',
-  3: 'Chọn loại switch và bấm nghe thử trước khi đặt.',
-  4: 'Kiểm tra lại thiết kế rồi điền thông tin nhận hàng.',
+  1: 'Chọn bộ màu, số phím và xem giá nhỏ cập nhật ngay phía trên.',
+  2: 'Chạm vào từng phím để nhập đúng 1 ký tự IN HOA hoặc chọn 1 icon.',
+  3: 'Chọn loại switch rồi bấm nghe thử trước khi chốt.',
+  4: 'Kiểm tra lại thiết kế và điền thông tin nhận hàng.',
 };
 
 interface ProductConfiguratorProps {
@@ -127,6 +127,29 @@ export default function ProductConfigurator({ product }: ProductConfiguratorProp
     }
   };
 
+  const validateCurrentStep = (): boolean => {
+    if (step !== 2) return true;
+
+    const designErrors = validateDesign(config.customData, product);
+    if (hasErrors(designErrors)) {
+      setErrors((current) => ({ ...current, ...designErrors }));
+      showToast('Bạn cần nhập đủ nội dung cho từng phím trước khi sang bước tiếp theo.', 'error');
+      return false;
+    }
+
+    setErrors((current) => {
+      const next = { ...current };
+      delete next.keys;
+      return next;
+    });
+    return true;
+  };
+
+  const handleNextStep = () => {
+    if (!validateCurrentStep()) return;
+    goToStep(step + 1);
+  };
+
   const handleSubmit = async () => {
     if (submitting) return;
 
@@ -184,8 +207,29 @@ export default function ProductConfigurator({ product }: ProductConfiguratorProp
   const isLastStep = step === STEPS.length;
 
   return (
-    <div ref={sectionRef} className="scroll-mt-20 px-4">
-      <div className="mx-auto max-w-[720px]">
+    <div ref={sectionRef} className="scroll-mt-20 px-4 pb-10">
+      <div className="mx-auto max-w-[760px]">
+        <div className="mb-4 flex flex-wrap items-center justify-end gap-2">
+          {config.canRestore ? (
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={handleRestore}
+              icon={<Undo2 className="h-3.5 w-3.5" />}
+            >
+              Khôi phục thiết kế trước
+            </Button>
+          ) : null}
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleReset}
+            icon={<RotateCcw className="h-3.5 w-3.5" />}
+          >
+            Bắt đầu lại
+          </Button>
+        </div>
+
         <StepProgress
           steps={STEPS}
           currentStep={step}
@@ -193,7 +237,7 @@ export default function ProductConfigurator({ product }: ProductConfiguratorProp
           onStepClick={goToStep}
         />
 
-        <section className="rounded-[28px] border border-primary/25 bg-white px-5 py-6 shadow-[0_12px_40px_rgba(131,86,176,0.09)] sm:px-8 sm:py-8">
+        <section className="rounded-[30px] border border-primary/20 bg-white px-5 py-6 shadow-[0_12px_40px_rgba(131,86,176,0.09)] sm:px-8 sm:py-8">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
             <div>
               <h1 className="font-display text-xl font-bold text-primary sm:text-2xl">
@@ -202,7 +246,7 @@ export default function ProductConfigurator({ product }: ProductConfiguratorProp
               <p className="mt-1 text-sm text-ink-muted">{STEP_DESCRIPTIONS[step]}</p>
             </div>
 
-            <div className="w-fit shrink-0 rounded-full bg-primary-soft/60 px-3 py-1.5 text-xs text-ink-muted">
+            <div className="w-fit shrink-0 rounded-full bg-primary-soft/70 px-3 py-1.5 text-xs text-ink-muted">
               Giá hiện tại:{' '}
               <strong className="font-display text-sm text-primary" aria-live="polite">
                 {formatVnd(unitPrice)}
@@ -210,18 +254,15 @@ export default function ProductConfigurator({ product }: ProductConfiguratorProp
             </div>
           </div>
 
-          <div className="my-6 sm:my-7">
-            <ProductPreview
-              customData={config.customData}
-              palette={palette}
-              captureRef={previewRef}
-              compact
-            />
-          </div>
-
-          <div className="space-y-7">
+          <div className="mt-6 space-y-6 sm:mt-7 sm:space-y-7">
             {step === 1 ? (
               <>
+                <ProductPreview
+                  customData={config.customData}
+                  palette={palette}
+                  captureRef={previewRef}
+                  compact
+                />
                 <CharacterCountSelector
                   product={product}
                   value={config.state.characterCount}
@@ -236,21 +277,14 @@ export default function ProductConfigurator({ product }: ProductConfiguratorProp
             ) : null}
 
             {step === 2 ? (
-              <>
-                <KeyCustomizer
-                  product={product}
-                  keys={config.state.keys}
-                  characterCount={config.state.characterCount}
-                  palette={palette}
-                  onSetKey={config.setKey}
-                  onClearKey={config.clearKey}
-                />
-                {errors.keys ? (
-                  <p className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-                    {errors.keys}
-                  </p>
-                ) : null}
-              </>
+              <KeyCustomizer
+                product={product}
+                keys={config.state.keys}
+                characterCount={config.state.characterCount}
+                palette={palette}
+                onSetKey={config.setKey}
+                errorMessage={errors.keys}
+              />
             ) : null}
 
             {step === 3 ? (
@@ -263,6 +297,12 @@ export default function ProductConfigurator({ product }: ProductConfiguratorProp
 
             {step === 4 ? (
               <>
+                <ProductPreview
+                  customData={config.customData}
+                  palette={palette}
+                  captureRef={previewRef}
+                  compact
+                />
                 <OrderSummary
                   product={product}
                   customData={config.customData}
@@ -283,36 +323,33 @@ export default function ProductConfigurator({ product }: ProductConfiguratorProp
             ) : null}
           </div>
 
-          <div className="mt-7 flex gap-2.5">
+          <div className={`mt-8 flex gap-3 ${step === 1 ? 'justify-end' : 'flex-col sm:flex-row'} ${step === 4 ? 'sm:items-center' : ''}`}>
             {step > 1 ? (
               <Button
                 variant="secondary"
                 size="lg"
                 onClick={() => goToStep(step - 1)}
-                aria-label="Quay lại bước trước"
-                className="!rounded-full px-5"
+                className="min-w-[180px] sm:flex-1"
+                icon={<ArrowLeft className="h-4 w-4" />}
               >
-                <ArrowLeft className="h-4 w-4" aria-hidden="true" />
-                <span className="hidden sm:inline">Quay lại</span>
+                Quay lại
               </Button>
             ) : null}
 
             {isLastStep ? (
               <Button
                 size="lg"
-                fullWidth
                 onClick={handleSubmit}
                 loading={submitting}
-                className="!rounded-full"
+                className="min-w-[220px] sm:flex-1"
               >
                 {submitting ? 'Đang gửi đơn…' : `Đặt hàng – ${formatVnd(subtotal)}`}
               </Button>
             ) : (
               <Button
                 size="lg"
-                fullWidth
-                onClick={() => goToStep(step + 1)}
-                className="!rounded-full"
+                onClick={handleNextStep}
+                className={step === 1 ? 'min-w-[220px]' : 'min-w-[220px] sm:flex-1'}
               >
                 Tiếp theo
                 <ArrowRight className="h-4 w-4" aria-hidden="true" />
@@ -320,27 +357,6 @@ export default function ProductConfigurator({ product }: ProductConfiguratorProp
             )}
           </div>
         </section>
-
-        <div className="mt-3 flex flex-wrap items-center justify-center gap-1 text-xs">
-          {config.canRestore ? (
-            <button
-              type="button"
-              onClick={handleRestore}
-              className="inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-ink-muted hover:bg-white/70 hover:text-primary"
-            >
-              <Undo2 className="h-3.5 w-3.5" aria-hidden="true" />
-              Khôi phục thiết kế trước
-            </button>
-          ) : null}
-          <button
-            type="button"
-            onClick={handleReset}
-            className="inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-ink-muted hover:bg-white/70 hover:text-primary"
-          >
-            <RotateCcw className="h-3.5 w-3.5" aria-hidden="true" />
-            Bắt đầu lại
-          </button>
-        </div>
       </div>
     </div>
   );

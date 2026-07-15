@@ -1,6 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import { isValidVnPhone, normalizePhone } from '../../shared/phone';
-import { countGraphemes, sanitizeText, sliceGraphemes } from '../../shared/sanitize';
+import {
+  countGraphemes,
+  normalizeKeycapText,
+  sanitizeText,
+  sliceGraphemes,
+} from '../../shared/sanitize';
 import {
   createOrderRequestSchema,
   getOrderQuerySchema,
@@ -25,18 +30,15 @@ describe('normalizePhone / isValidVnPhone', () => {
     },
   );
 
-  it.each([
-    '091234567', // thiếu số
-    '09123456789', // thừa số
-    '0112345678', // đầu số không hợp lệ
-    'abcdefghij', // chữ
-    '',
-  ])('từ chối số không hợp lệ %s', (phone) => {
-    expect(isValidVnPhone(phone)).toBe(false);
-  });
+  it.each(['091234567', '09123456789', '0112345678', 'abcdefghij', ''])(
+    'từ chối số không hợp lệ %s',
+    (phone) => {
+      expect(isValidVnPhone(phone)).toBe(false);
+    },
+  );
 });
 
-describe('sanitizeText', () => {
+describe('sanitize helpers', () => {
   it('cắt khoảng trắng đầu cuối', () => {
     expect(sanitizeText('  Linh  ', 50)).toBe('Linh');
   });
@@ -52,6 +54,12 @@ describe('sanitizeText', () => {
   it('giữ nguyên dấu tiếng Việt', () => {
     expect(sanitizeText('Nguyễn Thị Ánh', 50)).toBe('Nguyễn Thị Ánh');
   });
+
+  it('normalizeKeycapText tự động in hoa và cắt còn 1 ký tự', () => {
+    expect(normalizeKeycapText('a', 1)).toBe('A');
+    expect(normalizeKeycapText('đ', 1)).toBe('Đ');
+    expect(normalizeKeycapText('ab', 1)).toBe('A');
+  });
 });
 
 const validRequest = {
@@ -62,9 +70,9 @@ const validRequest = {
     colorPaletteId: 'milk-tea-pastel',
     switchType: 'clicky',
     keys: [
-      { type: 'text', value: 'A' },
+      { type: 'text', value: 'a' },
       { type: 'icon', iconId: 'heart' },
-      { type: 'text', value: 'Linh' },
+      { type: 'text', value: 'c' },
     ],
   },
   customer: {
@@ -80,9 +88,11 @@ const validRequest = {
 };
 
 describe('createOrderRequestSchema', () => {
-  it('chấp nhận đơn hợp lệ và chuẩn hoá số điện thoại', () => {
+  it('chấp nhận đơn hợp lệ, chuẩn hoá số điện thoại và chữ trên phím thành IN HOA', () => {
     const parsed = createOrderRequestSchema.parse(validRequest);
     expect(parsed.customer.phone).toBe('0912345678');
+    expect(parsed.customData.keys[0]).toEqual({ type: 'text', value: 'A' });
+    expect(parsed.customData.keys[2]).toEqual({ type: 'text', value: 'C' });
   });
 
   it('bắt buộc tick xác nhận thiết kế', () => {
@@ -107,20 +117,9 @@ describe('createOrderRequestSchema', () => {
     ).toThrow();
   });
 
-  it('từ chối nội dung phím quá 4 ký tự', () => {
-    expect(() =>
-      createOrderRequestSchema.parse({
-        ...validRequest,
-        customData: {
-          ...validRequest.customData,
-          keys: [
-            { type: 'text', value: 'AAAAAAAAAAAAAAA' },
-            { type: 'text', value: 'B' },
-            { type: 'text', value: 'C' },
-          ],
-        },
-      }),
-    ).toThrow();
+  it('nội dung phím dài hơn 1 ký tự sẽ bị tự cắt còn 1 ký tự', () => {
+    const parsed = keyItemSchema.parse({ type: 'text', value: 'AB' });
+    expect(parsed).toEqual({ type: 'text', value: 'A' });
   });
 
   it('từ chối icon không nằm trong 5 icon được phép', () => {
@@ -170,7 +169,6 @@ describe('createOrderRequestSchema', () => {
 
   it('bỏ qua giá do frontend gửi lên — chỉ nhận như thông tin tham khảo', () => {
     const parsed = createOrderRequestSchema.parse({ ...validRequest, clientQuotedUnitPrice: 1 });
-    // Schema nhận giá trị, nhưng create-order tính lại giá từ characterCount.
     expect(parsed.clientQuotedUnitPrice).toBe(1);
     expect(parsed.customData.characterCount).toBe(3);
   });
@@ -192,37 +190,34 @@ describe('getOrderQuerySchema', () => {
 
 describe('đếm ký tự trên phím (emoji = 1 ký tự)', () => {
   it.each([
-    ['ABCD', 4],
-    ['2025', 4],
-    ['Hà', 2],
+    ['A', 1],
+    ['Đ', 1],
     ['🎉', 1],
-    ['🎉🎉🎉🎉', 4],
-    ['a🎉b', 3],
     ['❤️', 1],
     ['🇻🇳', 1],
     ['👨‍👩‍👧', 1],
+    ['AB', 2],
   ])('countGraphemes(%s) = %i', (input, expected) => {
     expect(countGraphemes(input)).toBe(expected);
   });
 
   it('đếm khác với .length của JS ở emoji', () => {
-    // Đây chính là lý do phải có countGraphemes: .length đếm sai.
     expect('🎉'.length).toBe(2);
     expect(countGraphemes('🎉')).toBe(1);
   });
 
   it('sliceGraphemes không xé đôi emoji', () => {
-    expect(sliceGraphemes('a🎉b🎉c', 4)).toBe('a🎉b🎉');
-    expect(countGraphemes(sliceGraphemes('a🎉b🎉c', 4))).toBe(4);
-    // Cách cũ dùng .slice sẽ tạo ký tự rác:
-    expect('a🎉b🎉c'.slice(0, 4)).not.toBe('a🎉b🎉');
+    expect(sliceGraphemes('a🎉b🎉c', 1)).toBe('a');
+    expect(sliceGraphemes('🎉🎉', 1)).toBe('🎉');
   });
 
-  it('nhận 4 emoji trên một phím, từ chối 5', () => {
-    const key = (value: string) => keyItemSchema.safeParse({ type: 'text', value });
-    expect(key('🎉🎉🎉🎉').success).toBe(true);
-    expect(key('🎉🎉🎉🎉🎉').success).toBe(false);
-    expect(key('ABCD').success).toBe(true);
-    expect(key('ABCDE').success).toBe(false);
+  it('nhận 1 emoji trên một phím và tự cắt chuỗi dài hơn 1 ký tự', () => {
+    const singleEmoji = keyItemSchema.parse({ type: 'text', value: '🎉' });
+    const twoEmoji = keyItemSchema.parse({ type: 'text', value: '🎉🎉' });
+    const twoLetters = keyItemSchema.parse({ type: 'text', value: 'AB' });
+
+    expect(singleEmoji).toEqual({ type: 'text', value: '🎉' });
+    expect(twoEmoji).toEqual({ type: 'text', value: '🎉' });
+    expect(twoLetters).toEqual({ type: 'text', value: 'A' });
   });
 });

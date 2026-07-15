@@ -1,7 +1,5 @@
 import { useRef, useState } from 'react';
-import { Check, Volume2 } from 'lucide-react';
 import type { ProductConfig, SwitchType } from '../../types/product';
-import { CardTitle } from '../ui/Card';
 
 interface SwitchSelectorProps {
   product: ProductConfig;
@@ -9,91 +7,88 @@ interface SwitchSelectorProps {
   onChange: (switchType: SwitchType) => void;
 }
 
+const SWITCH_EMOJIS: Record<SwitchType, string> = {
+  clicky: '🎹',
+  smooth: '🌊',
+};
+
+const COPY: Record<SwitchType, { title: string; description: string }> = {
+  clicky: {
+    title: 'Clicky',
+    description: 'Tiếng “tách tách” rõ ràng, cảm giác gõ rắn mạch.',
+  },
+  smooth: {
+    title: 'Smooth',
+    description: 'Không có tiếng tách, chỉ là âm va chạm nhẹ nhàng.',
+  },
+};
+
 export default function SwitchSelector({ product, value, onChange }: SwitchSelectorProps) {
   const audioRefs = useRef<Record<string, HTMLAudioElement | null>>({});
-  // Ẩn nút nghe thử nếu file âm thanh chưa được thêm vào public/audio/.
   const [unavailable, setUnavailable] = useState<Record<string, boolean>>({});
 
   const play = (id: string) => {
     const audio = audioRefs.current[id];
     if (!audio) return;
     audio.currentTime = 0;
-    // File có thể chưa tồn tại — bắt lỗi để trang không bị crash.
     void audio.play().catch(() => {
       setUnavailable((current) => ({ ...current, [id]: true }));
     });
   };
 
   return (
-    <section>
-      <CardTitle hint="Cảm giác bấm và tiếng kêu khác nhau rõ rệt giữa hai loại.">
-        Âm thanh switch
-      </CardTitle>
-
-      <div className="grid gap-3 sm:grid-cols-2" role="radiogroup" aria-label="Loại switch">
-        {product.switches.map((option) => {
-          const selected = option.id === value;
-          return (
-            <div
-              key={option.id}
-              className={[
-                'relative rounded-xl border p-4 transition-all',
-                selected ? 'border-primary bg-primary-soft/60 shadow-soft' : 'border-line bg-white',
-              ].join(' ')}
+    <div className="grid gap-4 sm:grid-cols-2" role="radiogroup" aria-label="Loại switch">
+      {product.switches.map((option) => {
+        const selected = option.id === value;
+        const copy = COPY[option.id];
+        return (
+          <div
+            key={option.id}
+            className={[
+              'rounded-[26px] border bg-white p-5 text-center transition-all',
+              selected
+                ? 'border-primary shadow-[0_10px_30px_rgba(236,93,145,0.14)] ring-2 ring-primary-soft'
+                : 'border-line hover:border-primary/40',
+            ].join(' ')}
+          >
+            <button
+              type="button"
+              role="radio"
+              aria-checked={selected}
+              onClick={() => onChange(option.id)}
+              className="w-full"
             >
-              <button
-                type="button"
-                role="radio"
-                aria-checked={selected}
-                onClick={() => onChange(option.id)}
-                className="w-full text-left"
-              >
-                <div className="flex items-center justify-between">
-                  <p className="font-display text-lg font-semibold">{option.name}</p>
-                  {selected ? (
-                    <span className="flex h-5 w-5 items-center justify-center rounded-full bg-primary text-white">
-                      <Check className="h-3 w-3" aria-hidden="true" />
-                    </span>
-                  ) : null}
-                </div>
-                <p className="mt-1 text-sm text-ink-muted">{option.description}</p>
+              <div className="mb-4 text-4xl" aria-hidden="true">
+                {SWITCH_EMOJIS[option.id]}
+              </div>
+              <p className="font-display text-2xl font-bold text-primary">{copy.title}</p>
+              <p className="mt-2 min-h-[48px] text-base leading-relaxed text-ink-muted">
+                {copy.description}
+              </p>
+            </button>
 
-                <div className="mt-3 flex flex-wrap gap-1.5">
-                  {option.soundTraits.map((trait) => (
-                    <span
-                      key={trait}
-                      className="rounded-full bg-cream px-2.5 py-1 text-[11px] text-ink-muted"
-                    >
-                      {trait}
-                    </span>
-                  ))}
-                </div>
-              </button>
-
-              {!unavailable[option.id] ? (
-                <>
-                  <button
-                    type="button"
-                    onClick={() => play(option.id)}
-                    className="mt-3 inline-flex items-center gap-1.5 rounded-lg border border-line bg-white px-2.5 py-1.5 text-xs font-medium text-primary hover:bg-primary-soft"
-                  >
-                    <Volume2 className="h-3.5 w-3.5" aria-hidden="true" />
-                    Nghe thử
-                  </button>
-                  <audio
-                    ref={(el) => {
-                      audioRefs.current[option.id] = el;
-                    }}
-                    src={option.sampleAudioUrl}
-                    preload="none"
-                    onError={() => setUnavailable((current) => ({ ...current, [option.id]: true }))}
-                  />
-                </>
-              ) : null}
-            </div>
-          );
-        })}
-      </div>
-    </section>
+            {!unavailable[option.id] ? (
+              <>
+                <button
+                  type="button"
+                  onClick={() => play(option.id)}
+                  className="mt-4 inline-flex items-center gap-2 rounded-full bg-primary-soft px-4 py-2 text-sm font-semibold text-primary transition-colors hover:bg-primary-soft/80"
+                >
+                  ▶ Nghe thử
+                </button>
+                <audio
+                  ref={(el) => {
+                    audioRefs.current[option.id] = el;
+                  }}
+                  src={option.sampleAudioUrl}
+                  preload="none"
+                  onError={() => setUnavailable((current) => ({ ...current, [option.id]: true }))}
+                />
+              </>
+            ) : null}
+          </div>
+        );
+      })}
+    </div>
   );
 }

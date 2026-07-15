@@ -1,6 +1,6 @@
 import { LIMITS } from '../../shared/constants';
-import { countGraphemes } from '../../shared/sanitize';
 import { isValidVnPhone, normalizePhone } from '../../shared/phone';
+import { countGraphemes } from '../../shared/sanitize';
 import type { ClickerCustomData } from '../../shared/orderSchema';
 import type { ProductConfig } from '../types/product';
 
@@ -49,24 +49,23 @@ export function validateDesign(data: ClickerCustomData, product: ProductConfig):
     errors.switchType = 'Vui lòng chọn loại switch.';
   }
 
-  const activeKeys = getActiveKeys(data);
   const empty = findEmptyKeyIndexes(data);
   if (empty.length > 0) {
     errors.keys = `Phím ${empty.map((i) => i + 1).join(', ')} chưa có nội dung.`;
   }
 
-  const invalidIcon = activeKeys.findIndex(
-    (key) => key.type === 'icon' && !product.icons.some((icon) => icon.id === key.iconId),
+  const invalidIconIndex = getActiveKeys(data).findIndex(
+    (k) => k.type === 'icon' && !product.icons.some((icon) => icon.id === k.iconId),
   );
-  if (invalidIcon >= 0) {
-    errors.keys = `Icon ở phím ${invalidIcon + 1} không hợp lệ. Vui lòng chọn lại.`;
+  if (invalidIconIndex >= 0) {
+    errors.keys = `Phím ${invalidIconIndex + 1} có icon không hợp lệ.`;
   }
 
-  const tooLong = activeKeys.findIndex(
-    (key) => key.type === 'text' && countGraphemes(key.value) > LIMITS.keyTextMaxLength,
+  const invalidLengthIndex = getActiveKeys(data).findIndex(
+    (k) => k.type === 'text' && countGraphemes(k.value) !== LIMITS.keyTextMaxLength,
   );
-  if (tooLong >= 0) {
-    errors.keys = `Phím ${tooLong + 1} vượt quá ${LIMITS.keyTextMaxLength} ký tự.`;
+  if (invalidLengthIndex >= 0) {
+    errors.keys = `Phím ${invalidLengthIndex + 1} chỉ được nhập đúng 1 ký tự.`;
   }
 
   return errors;
