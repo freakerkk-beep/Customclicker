@@ -42,6 +42,9 @@ export default function KeyCustomizer({
   const textValue = isText ? activeKey.value : '';
   const textLength = countGraphemes(textValue);
   const emptyText = isText && textLength === 0;
+  const columns = characterCount <= 6 ? characterCount : characterCount <= 8 ? 4 : characterCount <= 10 ? 5 : 6;
+  const keyGap = 8;
+  const keyBasis = `calc((100% - ${(columns - 1) * keyGap}px) / ${columns})`;
 
   const setTextMode = () => {
     const currentValue = activeKey.type === 'text' ? activeKey.value : '';
@@ -59,8 +62,8 @@ export default function KeyCustomizer({
         <p className="text-sm font-semibold text-ink-muted">Đang chỉnh Phím {activeIndex + 1} ✏️</p>
       </div>
 
-      <div className="mx-auto mt-4 w-full max-w-[420px] rounded-[28px] px-4 py-5" style={{ backgroundColor: colors.tray }}>
-        <div className="flex items-end justify-center gap-2">
+      <div className="mx-auto mt-4 w-full max-w-[480px] rounded-[28px] px-4 py-5" style={{ backgroundColor: colors.tray }}>
+        <div className="flex flex-wrap items-end justify-center" style={{ gap: keyGap }}>
           {visibleKeys.map((item, index) => {
             const Icon = item.type === 'icon' ? getIconComponent(item.iconId) : null;
             const selected = index === activeIndex;
@@ -73,10 +76,10 @@ export default function KeyCustomizer({
                 onClick={() => setActiveIndex(index)}
                 aria-pressed={selected}
                 className={[
-                  'relative flex h-20 w-20 items-center justify-center rounded-[18px] border-2 shadow-[inset_0_-4px_0_rgba(0,0,0,0.12)] transition-all sm:h-24 sm:w-24',
+                  'relative flex aspect-square shrink-0 items-center justify-center rounded-[18px] border-2 shadow-[inset_0_-4px_0_rgba(0,0,0,0.12)] transition-all',
                   selected ? 'border-white ring-4 ring-primary-soft/80' : 'border-transparent',
                 ].join(' ')}
-                style={{ backgroundColor: colors.key }}
+                style={{ backgroundColor: colors.key, flexBasis: keyBasis, maxWidth: keyBasis }}
               >
                 {Icon ? (
                   <Icon className="h-7 w-7 sm:h-8 sm:w-8" style={{ color: colors.text }} aria-hidden="true" />

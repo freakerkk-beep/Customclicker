@@ -195,6 +195,11 @@ insert into storage.buckets (id, name, public)
 values ('order-previews', 'order-previews', true)
 on conflict (id) do nothing;
 
+-- Nếu bucket đã tồn tại từ bản cũ, đảm bảo nó được chuyển sang Public.
+update storage.buckets
+set public = true
+where id = 'order-previews';
+
 drop policy if exists "public read order previews" on storage.objects;
 create policy "public read order previews"
   on storage.objects for select

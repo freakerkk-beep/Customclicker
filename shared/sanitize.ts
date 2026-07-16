@@ -1,3 +1,4 @@
+/* eslint-disable no-control-regex */
 /**
  * Làm sạch chuỗi do khách nhập trước khi lưu / gửi sang Pancake.
  * Không bao giờ render chuỗi này dưới dạng HTML — chỉ dùng như text.

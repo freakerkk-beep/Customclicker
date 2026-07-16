@@ -37,6 +37,8 @@ export interface PancakeOrderContext {
   unitPrice: number;
   subtotal: number;
   orderDetailUrl: string;
+  /** URL công khai của ảnh preview riêng cho đơn hàng. */
+  previewUrl?: string | null;
   /** Nội dung từng phím đã render sẵn thành text: ["A", "B", "HEART", ...] */
   keyLabels: string[];
 }
@@ -100,7 +102,11 @@ export function buildPancakeNote(ctx: PancakeOrderContext): string {
     lines.push('', `Ghi chú của khách: ${ctx.customer.note}`);
   }
 
-  lines.push('', 'Link thiết kế:', ctx.orderDetailUrl);
+  if (ctx.previewUrl) {
+    lines.push('', 'ẢNH THIẾT KẾ (bấm link để xem):', ctx.previewUrl);
+  }
+
+  lines.push('', 'Link chi tiết đơn:', ctx.orderDetailUrl);
 
   return lines.join('\n');
 }

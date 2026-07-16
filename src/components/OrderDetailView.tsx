@@ -1,10 +1,3 @@
-import { Check, Clock, XCircle } from 'lucide-react';
-import {
-  ORDER_STATUS_DESCRIPTIONS,
-  ORDER_STATUS_FLOW,
-  ORDER_STATUS_LABELS,
-  type OrderStatus,
-} from '../../shared/constants';
 import type { OrderView } from '../types/order';
 import { formatVnd } from '../utils/currency';
 import Card, { CardTitle } from './ui/Card';
@@ -20,99 +13,18 @@ function formatDateTime(iso: string): string {
   }).format(new Date(iso));
 }
 
-function StatusBadge({ status }: { status: OrderStatus }) {
-  const isCancelled = status === 'cancelled';
-  const isDone = status === 'completed';
-
-  return (
-    <span
-      className={[
-        'inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium',
-        isCancelled
-          ? 'bg-red-100 text-red-700'
-          : isDone
-            ? 'bg-emerald-100 text-emerald-700'
-            : 'bg-primary-soft text-primary',
-      ].join(' ')}
-    >
-      {isCancelled ? (
-        <XCircle className="h-3.5 w-3.5" aria-hidden="true" />
-      ) : isDone ? (
-        <Check className="h-3.5 w-3.5" aria-hidden="true" />
-      ) : (
-        <Clock className="h-3.5 w-3.5" aria-hidden="true" />
-      )}
-      {ORDER_STATUS_LABELS[status]}
-    </span>
-  );
-}
-
-/** Timeline theo luồng chuẩn, đánh dấu các bước đã qua. */
-function StatusTimeline({ status }: { status: OrderStatus }) {
-  if (status === 'cancelled') {
-    return (
-      <div className="rounded-xl border border-red-200 bg-red-50 p-4">
-        <p className="text-sm font-medium text-red-800">{ORDER_STATUS_LABELS.cancelled}</p>
-        <p className="mt-1 text-xs text-red-700">{ORDER_STATUS_DESCRIPTIONS.cancelled}</p>
-      </div>
-    );
-  }
-
-  const currentIndex = ORDER_STATUS_FLOW.indexOf(status);
-
-  return (
-    <ol className="relative space-y-4 pl-6">
-      <span
-        className="absolute left-[7px] top-2 h-[calc(100%-1rem)] w-px bg-line"
-        aria-hidden="true"
-      />
-      {ORDER_STATUS_FLOW.map((flowStatus, index) => {
-        const done = currentIndex >= 0 && index <= currentIndex;
-        const active = index === currentIndex;
-
-        return (
-          <li key={flowStatus} className="relative">
-            <span
-              className={[
-                'absolute -left-6 top-1 flex h-4 w-4 items-center justify-center rounded-full border-2',
-                done ? 'border-primary bg-primary' : 'border-line bg-white',
-              ].join(' ')}
-              aria-hidden="true"
-            >
-              {done ? <Check className="h-2.5 w-2.5 text-white" /> : null}
-            </span>
-            <p
-              className={`text-sm ${active ? 'font-semibold text-primary' : done ? 'text-ink' : 'text-ink-muted'}`}
-            >
-              {ORDER_STATUS_LABELS[flowStatus]}
-            </p>
-            {active ? (
-              <p className="mt-0.5 text-xs text-ink-muted">
-                {ORDER_STATUS_DESCRIPTIONS[flowStatus]}
-              </p>
-            ) : null}
-          </li>
-        );
-      })}
-    </ol>
-  );
-}
-
 export default function OrderDetailView({ order }: { order: OrderView }) {
   const item = order.items[0];
 
   return (
     <div className="space-y-5">
       <Card>
-        <div className="flex flex-wrap items-start justify-between gap-3">
-          <div>
-            <p className="text-xs text-ink-muted">Mã đơn</p>
-            <p className="font-display text-xl font-bold tracking-wide text-primary">
-              {order.orderCode}
-            </p>
-            <p className="mt-1 text-xs text-ink-muted">Đặt lúc {formatDateTime(order.createdAt)}</p>
-          </div>
-          <StatusBadge status={order.status} />
+        <div>
+          <p className="text-xs text-ink-muted">Mã đơn</p>
+          <p className="font-display text-xl font-bold tracking-wide text-primary">
+            {order.orderCode}
+          </p>
+          <p className="mt-1 text-xs text-ink-muted">Đặt lúc {formatDateTime(order.createdAt)}</p>
         </div>
 
         {item ? (
@@ -175,11 +87,6 @@ export default function OrderDetailView({ order }: { order: OrderView }) {
           </ul>
         </Card>
       ) : null}
-
-      <Card>
-        <CardTitle>Tình trạng đơn</CardTitle>
-        <StatusTimeline status={order.status} />
-      </Card>
 
       <Card>
         <CardTitle>Địa chỉ nhận hàng</CardTitle>

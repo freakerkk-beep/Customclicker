@@ -86,7 +86,7 @@ export default function HomePage() {
                 to={`/products/${product.slug}`}
                 className="card-surface group overflow-hidden p-0 transition-shadow hover:shadow-lift"
               >
-                <div className="aspect-[4/3] overflow-hidden bg-cream">
+                <div className="aspect-square overflow-hidden bg-cream">
                   <img
                     src={product.thumbnailUrl}
                     alt={product.images[0]?.alt ?? product.name}

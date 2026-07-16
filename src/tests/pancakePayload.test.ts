@@ -1,5 +1,5 @@
 import { describe, expect, it, beforeEach, afterEach } from 'vitest';
-import { mapOrderToPancakePayload } from '../../netlify/functions/lib/pancake';
+import { buildPancakeNote, mapOrderToPancakePayload } from '../../netlify/functions/lib/pancake';
 import { customClickerProduct } from '../products/custom-clicker';
 
 const ORIGINAL_ENV = { ...process.env };
@@ -43,6 +43,7 @@ describe('Pancake create-order payload', () => {
       unitPrice: 79_000,
       subtotal: 79_000,
       orderDetailUrl: 'https://example.com/order/RAC-260715-A8F2',
+      previewUrl: 'https://project.supabase.co/storage/v1/object/public/order-previews/RAC-260715-A8F2.png',
       keyLabels: ['A', 'HEART', 'C'],
     });
 
@@ -63,4 +64,43 @@ describe('Pancake create-order payload', () => {
     expect(payload.items[0]).not.toHaveProperty('variant_id');
     expect(payload.items[0]).not.toHaveProperty('retail_price');
   });
+
+  it('chèn public URL ảnh preview vào ghi chú Pancake', () => {
+    const note = buildPancakeNote({
+      orderCode: 'RAC-260715-A8F2',
+      product: customClickerProduct,
+      customer: {
+        fullName: 'Nguyen Van A',
+        phone: '0912345678',
+        province: 'Ha Noi',
+        district: 'Soc Son',
+        ward: 'Thanh Xuan',
+        addressDetail: 'So 43 duong Doan Ket',
+      },
+      customData: {
+        characterCount: 3,
+        colorPaletteId: 'milk-tea-pastel',
+        switchType: 'clicky',
+        keys: [
+          { type: 'text', value: 'A' },
+          { type: 'icon', iconId: 'heart' },
+          { type: 'text', value: 'C' },
+        ],
+      },
+      palette: customClickerProduct.palettes[0],
+      quantity: 1,
+      unitPrice: 79_000,
+      subtotal: 79_000,
+      orderDetailUrl: 'https://example.com/order/RAC-260715-A8F2',
+      previewUrl: 'https://project.supabase.co/storage/v1/object/public/order-previews/RAC-260715-A8F2.png',
+      keyLabels: ['A', 'HEART', 'C'],
+    });
+
+    expect(note).toContain('ẢNH THIẾT KẾ (bấm link để xem):');
+    expect(note).toContain(
+      'https://project.supabase.co/storage/v1/object/public/order-previews/RAC-260715-A8F2.png',
+    );
+    expect(note).toContain('Link chi tiết đơn:');
+  });
+
 });

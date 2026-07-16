@@ -261,6 +261,7 @@ export const handler: Handler = async (event) => {
     unitPrice: pricing.unitPrice,
     subtotal: pricing.subtotal,
     orderDetailUrl: `${siteUrl}/order/${orderCode}`,
+    previewUrl,
     keyLabels: buildKeyLabels(input.customData),
   });
 

@@ -31,7 +31,7 @@ export const customClickerProduct: ProductConfig = {
     { src: '/products/custom-clicker/clicker-2.svg', alt: 'Custom Clicker bộ màu Taro Sweet' },
     { src: '/products/custom-clicker/clicker-3.svg', alt: 'Custom Clicker bộ màu Honey Vanilla' },
   ],
-  thumbnailUrl: '/products/custom-clicker/clicker-1.svg',
+  thumbnailUrl: '/products/custom-clicker/cover.png',
 
   pricing: CLICKER_PRICING,
   productionTime: '3 – 5 ngày làm việc kể từ khi chốt đơn',
